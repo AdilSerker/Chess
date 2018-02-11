@@ -1,5 +1,5 @@
 import { Coordinates } from '../types/coordinates';
-import { Piece } from '../ChessPiece/ChessPiece';
+import { Piece } from '../ChessPiece/Piece';
 import { ICell } from '../Interface/ICell';
 
 export class Cell implements ICell {

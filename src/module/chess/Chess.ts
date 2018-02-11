@@ -159,8 +159,88 @@ export class Chess {
     }
 
     private _rookMoveLegal(coordinates: Coordinates[]): Coordinates[] {
-        console.log(object);
-        return coordinates;
+        const rook: Piece = this.controlPiece;
+        const idx: number = rowChar.indexOf(this.controlPiece.position.char);
+        const legalMove = [];
+
+        for (let i = idx + 1; i <= 8; ++i) {
+            console.log('test1');
+            if (this.board[rowChar[i]][rook.position.num].piece &&
+                    this.board[rowChar[i]][rook.position.num].piece.color === rook.color) {
+                break;
+            } else if (this.board[rowChar[i]][rook.position.num].piece &&
+                this.board[rowChar[i]][rook.position.num].piece.color !== rook.color) {
+                legalMove.push({
+                    char: rowChar[i],
+                    num: rook.position.num
+                });
+                break;
+            } else {
+                legalMove.push({
+                    char: rowChar[i],
+                    num: rook.position.num
+                });
+            }
+        }
+
+        for (let j = rook.position.num - 1; j > 0; --j) {
+            if (this.board[rowChar[idx]][j].piece &&
+                    this.board[rowChar[idx]][j].piece.color === rook.color) {
+                break;
+            } else if (this.board[rowChar[idx]][j].piece &&
+                this.board[rowChar[idx]][j].piece.color !== rook.color) {
+                legalMove.push({
+                    char: rowChar[idx],
+                    num: j
+                });
+                break;
+            } else {
+                legalMove.push({
+                    char: rowChar[idx],
+                    num: j
+                });
+            }
+        }
+
+        for (let j = rook.position.num + 1; j <= 8; ++j) {
+            if (this.board[rowChar[idx]][j].piece &&
+                    this.board[rowChar[idx]][j].piece.color === rook.color) {
+                break;
+            } else if (this.board[rowChar[idx]][j].piece &&
+                this.board[rowChar[idx]][j].piece.color !== rook.color) {
+                legalMove.push({
+                    char: rowChar[idx],
+                    num: j
+                });
+                break;
+            } else {
+                legalMove.push({
+                    char: rowChar[idx],
+                    num: j
+                });
+            }
+        }
+
+        for (let i = idx - 1; i > 0; --i) {
+            if (this.board[rowChar[i]][rook.position.num].piece &&
+                    this.board[rowChar[i]][rook.position.num].piece.color === rook.color) {
+                break;
+            } else if (this.board[rowChar[i]][rook.position.num].piece &&
+                this.board[rowChar[i]][rook.position.num].piece.color !== rook.color) {
+                legalMove.push({
+                    char: rowChar[i],
+                    num: rook.position.num
+                });
+                break;
+            } else {
+                legalMove.push({
+                    char: rowChar[i],
+                    num: rook.position.num
+                });
+            }
+        }
+
+        return legalMove;
     }
 
     private _knightMoveLegal(coordinates: Coordinates[]): Coordinates[] {
