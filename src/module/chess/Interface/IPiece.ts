@@ -1,6 +1,11 @@
-import { Coordinates } from '../types/coordinates';
+import { Coordinates } from '../types/Coordinates';
+import { Board } from '../Board/Board';
 
 export interface IPiece {
-    select(): Coordinates[];
+    select(board: Board): Coordinates[];
     move(coordinates: Coordinates): void;
+    id: number;
+    name: string;
+    color: boolean;
+    position: Coordinates;
 }

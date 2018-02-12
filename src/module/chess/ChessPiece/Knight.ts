@@ -1,72 +1,42 @@
-import { Coordinates, rowChar } from '../types/coordinates';
+import { Coordinates, KeyIndex, CharIndex } from '../types/Coordinates';
 import { Piece } from './Piece';
+import { Board } from '../Board/Board';
 
 export class Knight extends Piece {
 
-    public constructor(pos: Coordinates, color: string, id: number) {
-        super(pos, color, id);
-        this.name = 'Knight';
+    public constructor(pos: Coordinates, bool: boolean, id: number) {
+        super(pos, bool, id);
+        this.name_ = 'Knight';
     }
 
-    public select(): Coordinates[] {
-        const idx: number = rowChar.indexOf(this.pos_.char);
-        this.possibleMove_ = [];
-        if (idx + 2 <= 8 && this.pos_.num + 1 <= 8) {
-            this.possibleMove_.push({
-                char: rowChar[idx + 2],
-                num: this.pos_.num + 1
-            });
-        }
+    public select(board: Board): Coordinates[] {
+        const char: string = this.pos_.char;
+        const num: number = this.pos_.num;
+        const index: number = KeyIndex[char];
+        const moves: Coordinates[] = [];
 
-        if (idx + 1 <= 8 && this.pos_.num + 2 <= 8) {
-            this.possibleMove_.push({
-                char: rowChar[idx + 1],
-                num: this.pos_.num + 2
-            });
-        }
+        moves.concat(this._checkCell(index + 1, num + 2, board));
+        moves.concat(this._checkCell(index + 2, num + 1, board));
+        moves.concat(this._checkCell(index + 2, num - 1, board));
+        moves.concat(this._checkCell(index + 1, num - 2, board));
+        moves.concat(this._checkCell(index - 1, num - 2, board));
+        moves.concat(this._checkCell(index - 2, num - 1, board));
+        moves.concat(this._checkCell(index - 2, num + 1, board));
+        moves.concat(this._checkCell(index - 1, num + 2, board));
 
-        if (idx - 1 > 0 && this.pos_.num + 2 <= 8) {
-            this.possibleMove_.push({
-                char: rowChar[idx - 1],
-                num: this.pos_.num + 2
-            });
-        }
+        return this.legalMove_ = moves;
+    }
 
-        if (idx - 2 > 0 && this.pos_.num + 1 <= 8) {
-            this.possibleMove_.push({
-                char: rowChar[idx - 2],
-                num: this.pos_.num + 1
-            });
-        }
+    private _checkCell(charIndex: number, number: number, board: Board): Coordinates[] {
+        const num: number = number;
+        const moves: Coordinates[] = [];
+        const index: number = charIndex;
 
-        if (idx - 2 > 0 && this.pos_.num - 1 > 0) {
-            this.possibleMove_.push({
-                char: rowChar[idx - 2],
-                num: this.pos_.num - 1
-            });
+        if (index <= 8 && num <= 8 && index > 0 && num > 0 &&
+            (board.select(CharIndex[index], num).isEmpty() ||
+            board.select(CharIndex[index], num).getPiece().color !== this.color) ) {
+            moves.push({ char: CharIndex[index], num });
         }
-
-        if (idx - 1 > 0 && this.pos_.num - 2 > 0) {
-            this.possibleMove_.push({
-                char: rowChar[idx - 1],
-                num: this.pos_.num - 2
-            });
-        }
-
-        if (idx + 1 <= 8 && this.pos_.num - 2 > 0) {
-            this.possibleMove_.push({
-                char: rowChar[idx + 1],
-                num: this.pos_.num - 2
-            });
-        }
-
-        if (idx + 2 <= 8 && this.pos_.num - 1 > 0) {
-            this.possibleMove_.push({
-                char: rowChar[idx + 2],
-                num: this.pos_.num - 1
-            });
-        }
-
-        return this.possibleMove_;
+        return moves;
     }
 }

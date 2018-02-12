@@ -1,9 +1,9 @@
-import { Coordinates } from '../types/coordinates';
+import { Coordinates } from '../types/Coordinates';
 import { Piece } from '../ChessPiece/Piece';
 import { Cell } from './Cell';
 
 export class Board {
-    public field: any = {
+    private field_: any = {
         a: [ null ],
         b: [ null ],
         c: [ null ],
@@ -15,25 +15,23 @@ export class Board {
     };
 
     public constructor() {
-        let id: number = 1;
-        let isWhiteCell = true;
-        for (const key in this.field) {
+        let id: number = 1,
+            isWhiteCell = true;
+
+        for (const key in this.field_) {
             isWhiteCell = !isWhiteCell;
             for (let i = 1; i <= 8; ++i) {
-                this.field[key].push(new Cell(id++, isWhiteCell, { char: key, num: i }));
+                this.field_[key].push(new Cell(id++, isWhiteCell, { char: key, num: i }));
                 isWhiteCell = !isWhiteCell;
             }
         }
     }
 
-    public checkCell(cell: Coordinates): number {
-        if (this.field[cell.char][cell.num]) {
-            return this.field[cell.char][cell.num];
-        }
-        return null;
+    public insertPiece(piece: Piece): void {
+        this.field_[piece.position.char][piece.position.num].insertPiece(piece);
     }
 
-    public insertPiece(piece: Piece): void {
-        this.field[piece.position.char][piece.position.num].piece = piece;
+    public select(char: string, num: number): Cell {
+        return this.field_[char][num];
     }
 }

@@ -1,42 +1,43 @@
-import { Coordinates } from '../types/coordinates';
+import { Coordinates } from '../types/Coordinates';
 import { IPiece } from '../Interface/IPiece';
+import { Board } from '../Board/Board';
 
 export abstract class Piece implements IPiece {
-    public color: string;
-    public name: string;
 
+    protected color_: boolean;
+    protected name_: string;
     protected id_: number;
     protected pos_: Coordinates;
     protected steps_: number;
-    protected possibleMove_: Coordinates[];
+    protected legalMove_: Coordinates[];
 
-    public constructor(pos: Coordinates, color: string, id: number) {
+    public constructor(pos: Coordinates, bool: boolean, id: number) {
 
         this.id_ = id;
         this.pos_ = pos;
         this.steps_ = 0;
-        this.possibleMove_ = [];
-        this.color = color;
-    }
-
-    public get position(): Coordinates {
-        return { ...this.pos_ };
+        this.legalMove_ = [];
+        this.color_ = bool;
     }
 
     public get id(): number {
         return this.id_;
     }
 
-    public get legalMove() {
-        return this.possibleMove_;
+    public get position(): Coordinates {
+        return { ...this.pos_ };
     }
 
-    public set legalMove(legalMoveCoordinates: Coordinates[]) {
-        this.possibleMove_ = legalMoveCoordinates.slice();
+    public get name(): string {
+        return this.name_;
+    }
+
+    public get color(): boolean {
+        return this.color_;
     }
 
     public move(pos: Coordinates) {
-        if (JSON.stringify(this.possibleMove_)
+        if (JSON.stringify(this.legalMove_)
                 .indexOf(JSON.stringify(pos)) !== -1) {
             this.pos_ = pos;
             this.steps_++;
@@ -45,5 +46,6 @@ export abstract class Piece implements IPiece {
         }
     }
 
-    public abstract select(): Coordinates[];
+
+    public abstract select(board: Board): Coordinates[];
 }

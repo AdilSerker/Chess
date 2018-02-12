@@ -1,28 +1,62 @@
-import { Coordinates } from '../types/coordinates';
+import { Coordinates, CharIndex, KeyIndex } from '../types/Coordinates';
 import { Piece } from './Piece';
+import { Board } from '../Board/Board';
 
 export class Pawn extends Piece {
 
-    public constructor(pos: Coordinates, color: string, id: number) {
-        super(pos, color, id);
-        this.name = 'Pawn';
+    public constructor(pos: Coordinates, bool: boolean, id: number) {
+        super(pos, bool, id);
+        this.name_ = 'Pawn';
     }
 
-    public select(): Coordinates[] {
+    public select(board: Board): Coordinates[] {
+        const char: string = this.pos_.char;
+        const n: number = this.pos_.num;
+        const moves: Coordinates[] = [];
+        const index: number = KeyIndex[char];
+
         if (!this.steps_) {
-            this.possibleMove_ = [{
-                char: this.pos_.char,
-                num: this.color === 'white' ? this.pos_.num + 1 : this.pos_.num - 1
-            }, {
-                char: this.pos_.char,
-                num: this.color === 'white' ? this.pos_.num + 2 : this.pos_.num - 2
-            }];
+            if (this.color) {
+                if (!board.select(char, n + 1).isEmpty() && !board.select(char, n + 2).isEmpty()) {
+                    moves.push({ char, num: n + 1 }, { char: char, num: n + 2 });
+                }
+            } else {
+                if (!board.select(char, n - 1).isEmpty() && !board.select(char, n - 2).isEmpty()) {
+                    moves.push({ char: char, num: n - 1 }, { char: char, num: n + 2 });
+                }
+            }
         } else {
-            this.possibleMove_ = [{
-                char: this.pos_.char,
-                num: this.color === 'white' ? this.pos_.num + 1 : this.pos_.num - 1
-            }];
+            if (this.color) {
+                if (board.select(char, n + 1).isEmpty()) {
+                    moves.push({ char, num: n + 1 });
+                }
+            } else {
+                if (board.select(char, n - 1).isEmpty()) {
+                    moves.push({ char, num: n + 1 });
+                }
+            }
         }
-        return this.possibleMove_;
+
+        if (this.color) {
+            if (!board.select(CharIndex[index + 1], n + 1).isEmpty() &&
+                board.select(CharIndex[index + 1], n + 1).getPiece().color !== this.color) {
+                moves.push({ char: CharIndex[index + 1], num: n + 1 });
+            }
+            if (!board.select(CharIndex[index - 1], n + 1).isEmpty() &&
+                board.select(CharIndex[index - 1], n + 1).getPiece().color !== this.color) {
+                moves.push({ char: CharIndex[index - 1], num: n + 1 });
+            }
+        } else {
+            if (!board.select(CharIndex[index + 1], n - 1).isEmpty() &&
+                board.select(CharIndex[index + 1], n - 1).getPiece().color !== this.color) {
+                moves.push({ char: CharIndex[index + 1], num: n - 1 });
+            }
+            if (!board.select(CharIndex[index - 1], n - 1).isEmpty() &&
+                board.select(CharIndex[index - 1], n - 1).getPiece().color !== this.color) {
+                moves.push({ char: CharIndex[index - 1], num: n - 1 });
+            }
+        }
+
+        return this.legalMove_ = moves;
     }
 }

@@ -1,72 +1,68 @@
-import { Coordinates, rowChar } from '../types/coordinates';
+import { Coordinates, KeyIndex, CharIndex } from '../types/Coordinates';
 import { Piece } from './Piece';
+import { Board } from '../Board/Board';
 
 export class King extends Piece {
 
-    public constructor(pos: Coordinates, color: string, id: number) {
-        super(pos, color, id);
-        this.name = 'King';
+    public constructor(pos: Coordinates, bool: boolean, id: number) {
+        super(pos, bool, id);
+        this.name_ = 'King';
     }
 
-    public select(): Coordinates[] {
-        const idx: number = rowChar.indexOf(this.pos_.char);
-        this.possibleMove_ = [];
-        if (idx + 1 <= 8) {
-            this.possibleMove_.push({
-                char: rowChar[idx + 1],
-                num: this.pos_.num
-            });
+    public select(board: Board): Coordinates[] {
+        const char: string = this.pos_.char;
+        const num: number = this.pos_.num;
+        const index: number = KeyIndex[char];
+        const moves: Coordinates[] = [];
+
+        if (num + 1 <= 8 &&
+            board.select(char, num + 1).isEmpty() &&
+            board.select(char, num + 1).getPiece().color !== this.color) {
+                moves.push({ char, num: num + 1 });
         }
 
-        if (idx + 1 <= 8 && this.pos_.num + 1 <= 8) {
-            this.possibleMove_.push({
-                char: rowChar[idx + 1],
-                num: this.pos_.num + 1
-            });
+        if (num + 1 <= 8 && index + 1 <= 8 &&
+            board.select(CharIndex[index + 1], num + 1).isEmpty() &&
+            board.select(CharIndex[index + 1], num + 1).getPiece().color !== this.color) {
+                moves.push({ char: CharIndex[index + 1], num: num + 1 });
         }
 
-        if (this.pos_.num + 1 <= 8) {
-            this.possibleMove_.push({
-                char: rowChar[idx],
-                num: this.pos_.num + 1
-            });
+        if (index + 1 <= 8 &&
+            board.select(CharIndex[index + 1], num).isEmpty() &&
+            board.select(CharIndex[index + 1], num).getPiece().color !== this.color) {
+                moves.push({ char: CharIndex[index + 1], num });
         }
 
-        if (idx - 1 > 0 && this.pos_.num + 1 <= 8) {
-            this.possibleMove_.push({
-                char: rowChar[idx - 1],
-                num: this.pos_.num + 1
-            });
+        if (num - 1 > 0 && index + 1 <= 8 &&
+            board.select(CharIndex[index + 1], num - 1).isEmpty() &&
+            board.select(CharIndex[index + 1], num - 1).getPiece().color !== this.color) {
+                moves.push({ char: CharIndex[index + 1], num: num - 1 });
         }
 
-        if (idx - 1 > 0) {
-            this.possibleMove_.push({
-                char: rowChar[idx - 1],
-                num: this.pos_.num
-            });
+        if (index - 1 > 0 &&
+            board.select(CharIndex[index - 1], num).isEmpty() &&
+            board.select(CharIndex[index - 1], num).getPiece().color !== this.color) {
+                moves.push({ char: CharIndex[index - 1], num });
         }
 
-        if (idx - 1 > 0 && this.pos_.num - 1 > 0) {
-            this.possibleMove_.push({
-                char: rowChar[idx - 1],
-                num: this.pos_.num - 1
-            });
+        if (num - 1 > 0 && index - 1 > 0 &&
+            board.select(CharIndex[index - 1], num - 1).isEmpty() &&
+            board.select(CharIndex[index - 1], num - 1).getPiece().color !== this.color) {
+                moves.push({ char: CharIndex[index - 1], num: num - 1 });
         }
 
-        if (this.pos_.num - 1 > 0) {
-            this.possibleMove_.push({
-                char: rowChar[idx],
-                num: this.pos_.num - 1
-            });
+        if (num - 1 > 0 &&
+            board.select(char, num + 1).isEmpty() &&
+            board.select(char, num + 1).getPiece().color !== this.color) {
+                moves.push({ char, num: num - 1 });
         }
 
-        if (idx + 1 <= 8 && this.pos_.num - 1 > 0) {
-            this.possibleMove_.push({
-                char: rowChar[idx + 1],
-                num: this.pos_.num - 1
-            });
+        if (num + 1 <= 8 && index - 1 <= 8 &&
+            board.select(CharIndex[index - 1], num + 1).isEmpty() &&
+            board.select(CharIndex[index - 1], num + 1).getPiece().color !== this.color) {
+                moves.push({ char: CharIndex[index - 1], num: num + 1 });
         }
 
-        return this.possibleMove_;
+        return this.legalMove_ = moves;
     }
 }

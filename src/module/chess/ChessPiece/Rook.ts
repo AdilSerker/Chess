@@ -1,44 +1,72 @@
-import { Coordinates, rowChar } from '../types/coordinates';
+import { Coordinates, KeyIndex, CharIndex } from '../types/Coordinates';
 import { Piece } from './Piece';
+import { Board } from '../Board/Board';
 
 export class Rook extends Piece {
 
-    public constructor(pos: Coordinates, color: string, id: number) {
-        super(pos, color, id);
-        this.name = 'Rook';
+    public constructor(pos: Coordinates, bool: boolean, id: number) {
+        super(pos, bool, id);
+        this.name_ = 'Rook';
     }
 
-    public select(): Coordinates[] {
-        const idx: number = rowChar.indexOf(this.pos_.char);
-        this.possibleMove_ = [];
-        for (let i = idx + 1; i <= 8; ++i) {
-            this.possibleMove_.push({
-                char: rowChar[i],
-                num: this.pos_.num
-            });
+    public select(board: Board): Coordinates[] {
+        const char: string = this.pos_.char;
+        const num: number = this.pos_.num;
+        const moves: Coordinates[] = [];
+        const index: number = KeyIndex[char];
+
+        for (let n = num + 1; n <= 8; ++n) {
+            if (!board.select(char, n).isEmpty() &&
+                    board.select(char, n).getPiece().color === this.color) {
+                break;
+            } else if (!board.select(char, n).isEmpty() &&
+                !board.select(char, n).getPiece().color !== this.color) {
+                moves.push({ char, num: n });
+                break;
+            } else {
+                moves.push({ char, num: n });
+            }
         }
 
-        for (let j = this.pos_.num - 1; j > 0; --j) {
-            this.possibleMove_.push({
-                char: rowChar[idx],
-                num: j
-            });
+        for (let c = index + 1; c <= 8; c++) {
+            if (!board.select(CharIndex[c], num).isEmpty() &&
+                    board.select(CharIndex[c], num).getPiece().color === this.color) {
+                break;
+            } else if (!board.select(CharIndex[c], num).isEmpty() &&
+                !board.select(CharIndex[c], num).getPiece().color !== this.color) {
+                moves.push({ char: CharIndex[c], num });
+                break;
+            } else {
+                moves.push({ char: CharIndex[c], num });
+            }
         }
 
-        for (let j = this.pos_.num + 1; j <= 8; ++j) {
-            this.possibleMove_.push({
-                char: rowChar[idx],
-                num: j
-            });
+        for (let n = num - 1; n > 0; n--) {
+            if (!board.select(char, n).isEmpty() &&
+                    board.select(char, n).getPiece().color === this.color) {
+                break;
+            } else if (!board.select(char, n).isEmpty() &&
+                !board.select(char, n).getPiece().color !== this.color) {
+                moves.push({ char, num: n });
+                break;
+            } else {
+                moves.push({ char, num: n });
+            }
         }
 
-        for (let i = idx - 1; i > 0; --i) {
-            this.possibleMove_.push({
-                char: rowChar[i],
-                num: this.pos_.num
-            });
+        for (let c = index - 1; c > 0; c--) {
+            if (!board.select(CharIndex[c], num).isEmpty() &&
+                    board.select(CharIndex[c], num).getPiece().color === this.color) {
+                break;
+            } else if (!board.select(CharIndex[c], num).isEmpty() &&
+                !board.select(CharIndex[c], num).getPiece().color !== this.color) {
+                moves.push({ char: CharIndex[c], num });
+                break;
+            } else {
+                moves.push({ char: CharIndex[c], num });
+            }
         }
 
-        return this.possibleMove_;
+        return this.legalMove_ = moves;
     }
 }
