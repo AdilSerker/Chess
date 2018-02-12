@@ -13,6 +13,7 @@ export class Rook extends Piece {
         const char: string = this.pos_.char;
         const num: number = this.pos_.num;
         const moves: Coordinates[] = [];
+
         const index: number = KeyIndex[char];
 
         for (let n = num + 1; n <= 8; ++n) {
@@ -20,7 +21,7 @@ export class Rook extends Piece {
                     board.select(char, n).getPiece().color === this.color) {
                 break;
             } else if (!board.select(char, n).isEmpty() &&
-                !board.select(char, n).getPiece().color !== this.color) {
+                board.select(char, n).getPiece().color !== this.color) {
                 moves.push({ char, num: n });
                 break;
             } else {
@@ -33,7 +34,7 @@ export class Rook extends Piece {
                     board.select(CharIndex[c], num).getPiece().color === this.color) {
                 break;
             } else if (!board.select(CharIndex[c], num).isEmpty() &&
-                !board.select(CharIndex[c], num).getPiece().color !== this.color) {
+                board.select(CharIndex[c], num).getPiece().color !== this.color) {
                 moves.push({ char: CharIndex[c], num });
                 break;
             } else {
@@ -46,7 +47,7 @@ export class Rook extends Piece {
                     board.select(char, n).getPiece().color === this.color) {
                 break;
             } else if (!board.select(char, n).isEmpty() &&
-                !board.select(char, n).getPiece().color !== this.color) {
+                board.select(char, n).getPiece().color !== this.color) {
                 moves.push({ char, num: n });
                 break;
             } else {
@@ -59,7 +60,7 @@ export class Rook extends Piece {
                     board.select(CharIndex[c], num).getPiece().color === this.color) {
                 break;
             } else if (!board.select(CharIndex[c], num).isEmpty() &&
-                !board.select(CharIndex[c], num).getPiece().color !== this.color) {
+                board.select(CharIndex[c], num).getPiece().color !== this.color) {
                 moves.push({ char: CharIndex[c], num });
                 break;
             } else {

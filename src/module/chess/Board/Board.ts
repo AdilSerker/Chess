@@ -34,4 +34,20 @@ export class Board {
     public select(char: string, num: number): Cell {
         return this.field_[char][num];
     }
+
+    public flashCells(coordinates: Coordinates[]): void {
+        coordinates.forEach(item => {
+            this.field_[item.char][item.num].flash();
+        });
+    }
+
+    public flashOffAllCells(): void {
+        for (const key in this.field_) {
+            this.field_[key].forEach((cell: Cell) => {
+                if (cell) {
+                    cell.flashOff();
+                }
+            });
+        }
+    }
 }

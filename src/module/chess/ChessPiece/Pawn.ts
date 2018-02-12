@@ -17,11 +17,11 @@ export class Pawn extends Piece {
 
         if (!this.steps_) {
             if (this.color) {
-                if (!board.select(char, n + 1).isEmpty() && !board.select(char, n + 2).isEmpty()) {
+                if (board.select(char, n + 1).isEmpty() && board.select(char, n + 2).isEmpty()) {
                     moves.push({ char, num: n + 1 }, { char: char, num: n + 2 });
                 }
             } else {
-                if (!board.select(char, n - 1).isEmpty() && !board.select(char, n - 2).isEmpty()) {
+                if (board.select(char, n - 1).isEmpty() && board.select(char, n - 2).isEmpty()) {
                     moves.push({ char: char, num: n - 1 }, { char: char, num: n + 2 });
                 }
             }
@@ -36,22 +36,28 @@ export class Pawn extends Piece {
                 }
             }
         }
-
+        console.log(moves);
         if (this.color) {
-            if (!board.select(CharIndex[index + 1], n + 1).isEmpty() &&
+            if (CharIndex[index + 1] && n + 1 <= 8 &&
+                !board.select(CharIndex[index + 1], n + 1).isEmpty() &&
                 board.select(CharIndex[index + 1], n + 1).getPiece().color !== this.color) {
                 moves.push({ char: CharIndex[index + 1], num: n + 1 });
             }
-            if (!board.select(CharIndex[index - 1], n + 1).isEmpty() &&
+            if (CharIndex[index - 1] && n + 1 <= 8 &&
+                !board.select(CharIndex[index - 1], n + 1).isEmpty() &&
                 board.select(CharIndex[index - 1], n + 1).getPiece().color !== this.color) {
                 moves.push({ char: CharIndex[index - 1], num: n + 1 });
             }
         } else {
-            if (!board.select(CharIndex[index + 1], n - 1).isEmpty() &&
+
+            if (CharIndex[index + 1] && n - 1 > 0 &&
+                !board.select(CharIndex[index + 1], n - 1).isEmpty() &&
                 board.select(CharIndex[index + 1], n - 1).getPiece().color !== this.color) {
                 moves.push({ char: CharIndex[index + 1], num: n - 1 });
             }
-            if (!board.select(CharIndex[index - 1], n - 1).isEmpty() &&
+
+            if (CharIndex[index - 1] && n - 1 > 0 &&
+                !board.select(CharIndex[index - 1], n - 1).isEmpty() &&
                 board.select(CharIndex[index - 1], n - 1).getPiece().color !== this.color) {
                 moves.push({ char: CharIndex[index - 1], num: n - 1 });
             }

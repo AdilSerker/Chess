@@ -36,4 +36,8 @@ export class Cell implements ICell {
         return this.piece_ === null;
     }
 
+    public flashOff(): void {
+        this.flash_ = false;
+    }
+
 }

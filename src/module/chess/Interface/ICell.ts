@@ -6,5 +6,6 @@ export interface ICell {
     emptyCell(): void;
     getPiece(): Piece | null;
     flash(): void;
+    flashOff(): void;
     isEmpty(): boolean;
 }

@@ -15,14 +15,14 @@ export class Knight extends Piece {
         const index: number = KeyIndex[char];
         const moves: Coordinates[] = [];
 
-        moves.concat(this._checkCell(index + 1, num + 2, board));
-        moves.concat(this._checkCell(index + 2, num + 1, board));
-        moves.concat(this._checkCell(index + 2, num - 1, board));
-        moves.concat(this._checkCell(index + 1, num - 2, board));
-        moves.concat(this._checkCell(index - 1, num - 2, board));
-        moves.concat(this._checkCell(index - 2, num - 1, board));
-        moves.concat(this._checkCell(index - 2, num + 1, board));
-        moves.concat(this._checkCell(index - 1, num + 2, board));
+        moves.push( ...this._checkCell(index + 1, num + 2, board) );
+        moves.push( ...this._checkCell(index + 2, num + 1, board) );
+        moves.push( ...this._checkCell(index + 2, num - 1, board) );
+        moves.push( ...this._checkCell(index + 1, num - 2, board) );
+        moves.push( ...this._checkCell(index - 1, num - 2, board) );
+        moves.push( ...this._checkCell(index - 2, num - 1, board) );
+        moves.push( ...this._checkCell(index - 2, num + 1, board) );
+        moves.push( ...this._checkCell(index - 1, num + 2, board) );
 
         return this.legalMove_ = moves;
     }
@@ -32,7 +32,7 @@ export class Knight extends Piece {
         const moves: Coordinates[] = [];
         const index: number = charIndex;
 
-        if (index <= 8 && num <= 8 && index > 0 && num > 0 &&
+        if (CharIndex[index] && num <= 8 && num > 0 &&
             (board.select(CharIndex[index], num).isEmpty() ||
             board.select(CharIndex[index], num).getPiece().color !== this.color) ) {
             moves.push({ char: CharIndex[index], num });

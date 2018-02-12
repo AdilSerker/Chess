@@ -1,3 +1,4 @@
+import { Coordinates, KeyIndex, CharIndex } from './types/Coordinates';
 import { Board } from './Board/Board';
 import { Piece } from './ChessPiece/Piece';
 import { Bishop } from './ChessPiece/Bishop';
@@ -6,8 +7,7 @@ import { Knight } from './ChessPiece/Knight';
 import { Pawn } from './ChessPiece/Pawn';
 import { Queen } from './ChessPiece/Queen';
 import { Rook } from './ChessPiece/Rook';
-import { Coordinates, KeyIndex, CharIndex } from './types/Coordinates';
-import { PieceView } from './types/RenderField';
+
 
 export class Chess {
     public pieces: Piece[];
@@ -17,6 +17,7 @@ export class Chess {
     private isQueueWhite_: boolean = true;
     private legalMove_: Coordinates[];
     private choicesPiece_: Piece;
+
     /**
      * PUBLIC
      */
@@ -32,8 +33,9 @@ export class Chess {
             /*
             *  init White Pieces
             */
+
             // for (let i = 1; i <= 8; ++i) {
-            //     this.pieces.push(new Pawn({ char: rowChar[i], num: 2 }, true, ++id));
+            //     this.pieces.push(new Pawn({ char: CharIndex[i], num: 2 }, true, ++id));
             // }
             this.pieces.push(new Rook({ char: 'a', num: 1 }, true, ++id));
             this.pieces.push(new Knight({ char: 'b', num: 1 }, true, ++id));
@@ -47,9 +49,10 @@ export class Chess {
             /*
             *  init Black Piece
             */
-            // for (let i = 1; i <= 8; ++i) {
-            //     this.pieces.push(new Pawn({ char: rowChar[i], num: 7 }, false, ++id));
-            // }
+
+            for (let i = 1; i <= 8; ++i) {
+                this.pieces.push(new Pawn({ char: CharIndex[i], num: 7 }, false, ++id));
+            }
             this.pieces.push(new Rook({ char: 'a', num: 8 }, false, ++id));
             this.pieces.push(new Knight({ char: 'b', num: 8 }, false, ++id));
             this.pieces.push(new Bishop({ char: 'c', num: 8 }, false, ++id));
@@ -66,16 +69,13 @@ export class Chess {
 
     public choicePiece(id: number): void {
         const board = this.board;
-        const piecesPlayer: Piece[] = this.isQueueWhite_ ?
-            this.pieces.filter(this._isWhite) :
-            this.pieces.filter(this._isBlack);
-        const piece: Piece = piecesPlayer.filter(item => {
-            return item.id == id;
-        })[0];
-        console.log(piece);
+        const piece = this._getPiece(id);
+
         if (piece) {
+            board.flashOffAllCells();
             this.choicesPiece_ = piece;
             this.legalMove_ = piece.select(board);
+            board.flashCells(this.legalMove_);
         }
         else {
             throw new Error('Not Acceptable');
@@ -101,8 +101,8 @@ export class Chess {
         return this.legalMove_;
     }
 
-    public get state(): string | void {
-        return JSON.stringify(this.board_);
+    public get state(): Board | void {
+        return this.board_;
     }
 
     public get board() {
@@ -129,5 +129,16 @@ export class Chess {
         pieces.forEach(piece => {
             this.board_.insertPiece(piece);
         });
+    }
+
+    private _getPiece(id: number): Piece {
+        const piecesPlayer: Piece[] = this.isQueueWhite_ ?
+            this.pieces.filter(this._isWhite) :
+            this.pieces.filter(this._isBlack);
+        const piece: Piece = piecesPlayer.filter(item => {
+            return item.id == id;
+        })[0];
+        console.log(piece);
+        return piece;
     }
 }
