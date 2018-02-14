@@ -1,11 +1,12 @@
 import * as three from 'three';
-import { Scene, PerspectiveCamera, Light, WebGLRenderer } from 'three';
+import { Scene, PerspectiveCamera, Light, WebGLRenderer, CubeCamera, Object3D } from 'three';
 const OrbitControls = require('./lib/OrbitControls');
 const TrackballControls = require('./lib/TrackballControl');
 
 export class ChessScene {
     private scene_: Scene;
     private camera_: PerspectiveCamera;
+    private cubeCamera_: CubeCamera;
     private light_: Light;
     private renderer_: WebGLRenderer;
     private controls_: any;
@@ -13,12 +14,9 @@ export class ChessScene {
     public init(): void {
 
         const container = document.createElement( 'div' );
-        container.style.padding = '0px';
-        container.style.margin = '0px';
         document.body.appendChild(container);
 
         this._getScene();
-        this._getGround();
         this._getCamera();
         this._getLight();
         this._setRender(container);
@@ -37,11 +35,16 @@ export class ChessScene {
         this.controls_.handleResize();
     }
 
+    public addElements(...object: Object3D[]): void {
+        this.scene_.add(...object);
+    }
+
     private _render() {
+        this.cubeCamera_.update(this.renderer_, this.scene_);
         this.renderer_.render(this.scene_, this.camera_);
     }
 
-    private _setRender(container: HTMLElement) {
+    private _setRender(container: HTMLElement): void {
         const renderer = new three.WebGLRenderer( { antialias: true } );
         renderer.setPixelRatio( window.devicePixelRatio );
         renderer.setSize( window.innerWidth, window.innerHeight );
@@ -68,9 +71,12 @@ export class ChessScene {
     }
 
     private _getCamera() {
-        const camera = new three.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 10000 );
-        camera.position.set( 0, 250, 1000 );
+        const camera = new three.PerspectiveCamera(30, window.innerWidth / window.innerHeight, 1, 100000 );
+        camera.position.set( -366, 3895, 18 );
+        camera.quaternion.set(-0.5217, 0.4754, 0.5255, 0.4751);
+
         this.camera_ = camera;
+        this.cubeCamera_ = new three.CubeCamera(1, 10000, 128);
         this.controls_ = new three.TrackballControls(camera);
         this.controls_.target.set(0, 120, 0);
 
@@ -85,24 +91,29 @@ export class ChessScene {
 
     }
 
-    private _getGround() {
-        const geometry = new three.PlaneGeometry(2000, 2000, 64);
-        const material = new three.ShadowMaterial({ opacity: 0.2 });
-        const plane = new three.Mesh(geometry, material);
-        plane.position.y = -200;
-        plane.receiveShadow = true;
-        this.scene_.add(plane);
-
-        const grid = new three.GridHelper(1600, 8);
-        grid.position.y = -198;
-        grid.material.opacity = 0.25;
-        grid.material.transparent = true;
-        this.scene_.add(grid);
-    }
-
     private _getScene() {
         const scene = new three.Scene();
         scene.background = new three.Color(0xf0f0f0);
+        const geometry = new three.PlaneGeometry(100000, 100000);
+        const material = new three.MeshStandardMaterial( {
+            map: null,
+            bumpScale: - 0.05,
+            color: 0xaaaaaa,
+            metalness: 0.5,
+            roughness: 1.0
+        } );
+        const plane = new three.Mesh(geometry, material);
+        plane.position.set(0, -1800, 0);
+        plane.rotation.x = - Math.PI * 0.5;
+
+        plane.receiveShadow = true;
+        scene.add(plane);
+
+        const grid = new three.GridHelper(1600, 8);
+        grid.material.opacity = 0.25;
+        grid.material.transparent = true;
+        scene.add(grid);
+
         this.scene_ = scene;
     }
 }

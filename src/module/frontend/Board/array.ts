@@ -1,0 +1,1 @@
+export const array: number[] = [ null, -7, -5, -3, -1, 1, 3, 5, 7 ];
