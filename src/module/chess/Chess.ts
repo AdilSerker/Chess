@@ -10,8 +10,8 @@ import { Rook } from './ChessPiece/Rook';
 
 
 export class Chess {
-    public pieces: Piece[];
 
+    private pieces_: Piece[];
     private board_: Board;
     private status: boolean = false;
     private isQueueWhite_: boolean = true;
@@ -23,7 +23,7 @@ export class Chess {
      */
     public constructor() {
         this.board_ = new Board();
-        this.pieces = [];
+        this.pieces_ = [];
     }
 
     public init(): void {
@@ -31,48 +31,47 @@ export class Chess {
         if (!this.status) {
             this.status = true;
             /*
-            *  init White Pieces
+            *  init White Pieces_
             */
 
-            // for (let i = 1; i <= 8; ++i) {
-            //     this.pieces.push(new Pawn({ char: CharIndex[i], num: 2 }, true, ++id));
-            // }
-            this.pieces.push(new Rook({ char: 'a', num: 1 }, true, ++id));
-            this.pieces.push(new Knight({ char: 'b', num: 1 }, true, ++id));
-            this.pieces.push(new Bishop({ char: 'c', num: 1 }, true, ++id));
-            this.pieces.push(new Queen({ char: 'd', num: 1 }, true, ++id));
-            this.pieces.push(new King({ char: 'e', num: 1 }, true, ++id));
-            this.pieces.push(new Bishop({ char: 'f', num: 1 }, true, ++id));
-            this.pieces.push(new Knight({ char: 'g', num: 1 }, true, ++id));
-            this.pieces.push(new Rook({ char: 'h', num: 1 }, true, ++id));
+            for (let i = 1; i <= 8; ++i) {
+                this.pieces_.push(new Pawn({ char: CharIndex[i], num: 2 }, true, ++id));
+            }
+            this.pieces_.push(new Rook({ char: 'a', num: 1 }, true, ++id));
+            this.pieces_.push(new Knight({ char: 'b', num: 1 }, true, ++id));
+            this.pieces_.push(new Bishop({ char: 'c', num: 1 }, true, ++id));
+            this.pieces_.push(new Queen({ char: 'd', num: 1 }, true, ++id));
+            this.pieces_.push(new King({ char: 'e', num: 1 }, true, ++id));
+            this.pieces_.push(new Bishop({ char: 'f', num: 1 }, true, ++id));
+            this.pieces_.push(new Knight({ char: 'g', num: 1 }, true, ++id));
+            this.pieces_.push(new Rook({ char: 'h', num: 1 }, true, ++id));
 
             /*
             *  init Black Piece
             */
 
             for (let i = 1; i <= 8; ++i) {
-                this.pieces.push(new Pawn({ char: CharIndex[i], num: 7 }, false, ++id));
+                this.pieces_.push(new Pawn({ char: CharIndex[i], num: 7 }, false, ++id));
             }
-            this.pieces.push(new Rook({ char: 'a', num: 8 }, false, ++id));
-            this.pieces.push(new Knight({ char: 'b', num: 8 }, false, ++id));
-            this.pieces.push(new Bishop({ char: 'c', num: 8 }, false, ++id));
-            this.pieces.push(new Queen({ char: 'd', num: 8 }, false, ++id));
-            this.pieces.push(new King({ char: 'e', num: 8 }, false, ++id));
-            this.pieces.push(new Bishop({ char: 'f', num: 8 }, false, ++id));
-            this.pieces.push(new Knight({ char: 'g', num: 8 }, false, ++id));
-            this.pieces.push(new Rook({ char: 'h', num: 8 }, false, ++id));
+            this.pieces_.push(new Rook({ char: 'a', num: 8 }, false, ++id));
+            this.pieces_.push(new Knight({ char: 'b', num: 8 }, false, ++id));
+            this.pieces_.push(new Bishop({ char: 'c', num: 8 }, false, ++id));
+            this.pieces_.push(new Queen({ char: 'd', num: 8 }, false, ++id));
+            this.pieces_.push(new King({ char: 'e', num: 8 }, false, ++id));
+            this.pieces_.push(new Bishop({ char: 'f', num: 8 }, false, ++id));
+            this.pieces_.push(new Knight({ char: 'g', num: 8 }, false, ++id));
+            this.pieces_.push(new Rook({ char: 'h', num: 8 }, false, ++id));
 
-            this._setPieces(this.pieces);
+            this._setPieces(this.pieces_);
         }
 
     }
 
-    public choicePiece(id: number): void {
-        const board = this.board;
+    public choicePiece(id: number): Coordinates[] {
+        const board = this.board_;
         const piece = this._getPiece(id);
 
         if (piece) {
-            board.flashOffAllCells();
             this.choicesPiece_ = piece;
             this.legalMove_ = piece.select(board);
             board.flashCells(this.legalMove_);
@@ -80,37 +79,44 @@ export class Chess {
         else {
             throw new Error('Not Acceptable');
         }
+        return this.legalMove_;
     }
 
     public move(coordinate: Coordinates): void {
-        const board = this.board;
+        const board = this.board_;
         const piece = this.choicesPiece_;
 
-        if (JSON.stringify(this.legalMove)
+        if (JSON.stringify(this.legalMove_)
                 .indexOf(JSON.stringify(coordinate)) !== -1) {
             board.select(piece.position.char, piece.position.num).emptyCell();
             piece.move(coordinate);
             board.insertPiece(piece);
+            board.flashOffAllCells();
             this.isQueueWhite_ = !this.isQueueWhite_;
         } else {
             throw new Error('Bad Request');
         }
     }
 
-    public get legalMove(): Coordinates[] {
-        return this.legalMove_;
-    }
-
-    public get state(): Board | void {
+    public getState(): Board | void {
         return this.board_;
     }
 
-    public get board() {
-        return this.board_;
-    }
+    public pieces(bool?: boolean): Piece[] {
+        let pieces: Piece[] = [];
+        if (bool) {
+            pieces = this.pieces_.filter(item => {
+                return item.color === bool;
+            });
+        } else if (bool !== undefined) {
+            pieces = this.pieces_.filter(item => {
+                return item.color !== bool;
+            });
+        } else {
+            pieces = this.pieces_.slice();
+        }
+        return pieces;
 
-    public get controlPiece() {
-        return this.choicesPiece_;
     }
 
     /**
@@ -125,20 +131,19 @@ export class Chess {
         return piece.color === false;
     }
 
-    private _setPieces(pieces: Piece[]): void {
-        pieces.forEach(piece => {
+    private _setPieces(pieces_: Piece[]): void {
+        pieces_.forEach(piece => {
             this.board_.insertPiece(piece);
         });
     }
 
     private _getPiece(id: number): Piece {
-        const piecesPlayer: Piece[] = this.isQueueWhite_ ?
-            this.pieces.filter(this._isWhite) :
-            this.pieces.filter(this._isBlack);
-        const piece: Piece = piecesPlayer.filter(item => {
+        const pieces_Player: Piece[] = this.isQueueWhite_ ?
+            this.pieces_.filter(this._isWhite) :
+            this.pieces_.filter(this._isBlack);
+        const piece: Piece = pieces_Player.filter(item => {
             return item.id == id;
         })[0];
-        console.log(piece);
         return piece;
     }
 }

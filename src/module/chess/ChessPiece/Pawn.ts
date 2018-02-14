@@ -22,7 +22,7 @@ export class Pawn extends Piece {
                 }
             } else {
                 if (board.select(char, n - 1).isEmpty() && board.select(char, n - 2).isEmpty()) {
-                    moves.push({ char: char, num: n - 1 }, { char: char, num: n + 2 });
+                    moves.push({ char: char, num: n - 1 }, { char: char, num: n - 2 });
                 }
             }
         } else {
@@ -36,7 +36,6 @@ export class Pawn extends Piece {
                 }
             }
         }
-        console.log(moves);
         if (this.color) {
             if (CharIndex[index + 1] && n + 1 <= 8 &&
                 !board.select(CharIndex[index + 1], n + 1).isEmpty() &&

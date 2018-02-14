@@ -14,8 +14,8 @@ html {
 }
 
 body {
-  padding-top: 60px;
-  margin-bottom: 75px;
+  padding: 0px;
+  margin: 0px;
 }
 
 footer {
@@ -28,6 +28,16 @@ footer {
   p, ul {
     margin-bottom: 0;
   }
+}
+
+div {
+  overflow: hidden;
+  padding: 0px;
+  margin: 0px;
+}
+
+canvas {
+  overflow: hidden;
 }
 
 // Input Fields
@@ -43,7 +53,7 @@ textarea {
 .navbar-nav img {
   width: 30px;
   height: 30px;
-  margin: -15px 15px -15px;
+  margin: 0px 0px 0px;
 }
 
 // Alerts

@@ -1,19 +1,19 @@
 {
-  "name": "express-typescript-starter",
-  "version": "0.1.0",
-  "description": "A starting point for Node.js express apps with TypeScript",
+  "name": "chess",
+  "version": "0.0.1",
+  "description": "Chess",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Microsoft/TypeScript-Node-Starter"
+    "url": ""
   },
-  "author": "Bowden Kelly",
+  "author": "Adil Serker",
   "license": "MIT",
   "scripts": {
     "start": "npm run serve",
-    "build": "npm run build-sass && npm run build-ts && npm run tslint && npm run copy-static-assets",
+    "build": "npm run build-sass && npm run build-ts && npm run tslint && npm run copy-static-assets && npm run browserify",
     "serve": "node dist/server.js",
     "watch-node": "nodemon dist/server.js",
-    "watch": "concurrently -k -p \"[{name}]\" -n \"Sass,TypeScript,Node\" -c \"yellow.bold,cyan.bold,green.bold\" \"npm run watch-sass\" \"npm run watch-ts\" \"npm run watch-node\"",
+    "watch": "concurrently -k -p \"[{name}]\" -n \"Sass,TypeScript,Node\" -c \"yellow.bold,cyan.bold,green.bold\" \"npm run watch-sass\" \"npm run watch-ts\" \"npm run watch-node\" \"npm run watch-bundle\" ",
     "test": "jest --forceExit --coverage --verbose",
     "build-ts": "tsc",
     "watch-ts": "tsc -w",
@@ -23,7 +23,9 @@
     "copy-static-assets": "ts-node copyStaticAssets.ts",
     "debug": "npm run build && npm run watch-debug",
     "serve-debug": "nodemon --inspect dist/server.js",
-    "watch-debug": "concurrently -k -p \"[{name}]\" -n \"Sass,TypeScript,Node\" -c \"yellow.bold,cyan.bold,green.bold\" \"npm run watch-sass\" \"npm run watch-ts\" \"npm run serve-debug\""
+    "watch-debug": "concurrently -k -p \"[{name}]\" -n \"Sass,TypeScript,Node\" -c \"yellow.bold,cyan.bold,green.bold\" \"npm run watch-sass\" \"npm run watch-ts\" \"npm run serve-debug\" ",
+    "browserify": "browserify dist/module/frontend/main.js -o dist/public/js/bundle.js",
+    "watch-bundle": "watchify dist/module/frontend/main.js -o dist/public/js/bundle.js"
   },
   "dependencies": {
     "async": "^2.6.0",
@@ -48,7 +50,8 @@
     "passport-facebook": "^2.1.1",
     "passport-local": "^1.0.0",
     "pug": "^2.0.0-rc.4",
-    "request": "^2.83.0"
+    "request": "^2.83.0",
+    "three": "^0.89.0"
   },
   "devDependencies": {
     "@types/async": "^2.0.45",
@@ -74,8 +77,9 @@
     "@types/passport-facebook": "^2.1.3",
     "@types/passport-local": "^1.0.32",
     "@types/request": "^2.0.9",
-    "@types/supertest": "^2.0.4",
     "@types/shelljs": "^0.7.7",
+    "@types/supertest": "^2.0.4",
+    "browserify": "^16.1.0",
     "chai": "^4.1.2",
     "concurrently": "^3.5.1",
     "jest": "^21.2.1",
