@@ -1,10 +1,12 @@
 import { ChessScene } from './Scene';
 import { Board } from './Board/Board';
+import { PawnModel } from './Piece/Pawn';
 
 const scene = new ChessScene();
 const board = new Board();
 
 scene.init();
+const pawn = new PawnModel();
 
 scene.addElements(board.getBoard());
 

@@ -24,15 +24,13 @@ export class ChessScene {
 
     public renderLoop() {
         requestAnimationFrame(this.renderLoop.bind(this));
-        this._controlUpdate();
         this._render();
     }
 
     public resizeWindow(event: Event) {
-        this.camera_.aspect = window.innerWidth / window.innerHeight;
-        this.camera_.updateProjectionMatrix();
         this.renderer_.setSize(window.innerWidth, window.innerHeight);
         this.controls_.handleResize();
+        this._updateCamera();
     }
 
     public addElements(...object: Object3D[]): void {
@@ -40,6 +38,7 @@ export class ChessScene {
     }
 
     private _render() {
+        this.controls_.update();
         this.cubeCamera_.update(this.renderer_, this.scene_);
         this.renderer_.render(this.scene_, this.camera_);
     }
@@ -66,29 +65,23 @@ export class ChessScene {
         this.light_ = light;
     }
 
-    private _controlUpdate() {
-        this.controls_.update();
+    private _getCamera() {
+        this.camera_ = new three.PerspectiveCamera(30, window.innerWidth / window.innerHeight, 1, 100000 );
+        this.cubeCamera_ = new three.CubeCamera(1, 10000, 128);
+        this.controls_ = new three.TrackballControls(this.camera_);
+
+        this._resetCamera();
     }
 
-    private _getCamera() {
-        const camera = new three.PerspectiveCamera(30, window.innerWidth / window.innerHeight, 1, 100000 );
-        camera.position.set( -366, 3895, 18 );
-        camera.quaternion.set(-0.5217, 0.4754, 0.5255, 0.4751);
+    private _resetCamera() {
+        this.camera_.position.set( -366, 3895, 18 );
+        this._updateCamera();
+    }
 
-        this.camera_ = camera;
-        this.cubeCamera_ = new three.CubeCamera(1, 10000, 128);
-        this.controls_ = new three.TrackballControls(camera);
-        this.controls_.target.set(0, 120, 0);
-
-        this.controls_.rotateSpeed = 1.0;
-        this.controls_.zoomSpeed = 1.2;
-        this.controls_.panSpeed = 0.8;
-        this.controls_.noZoom = false;
-        this.controls_.noPan = false;
-        this.controls_.staticMoving = true;
-        this.controls_.dynamicDampingFactor = 0.15;
-        this.controls_.keys = [ 65, 83, 68 ];
-
+    private _updateCamera() {
+        this.camera_.aspect = window.innerWidth / window.innerHeight;
+        this.camera_.lookAt(new three.Vector3());
+        this.camera_.updateProjectionMatrix();
     }
 
     private _getScene() {

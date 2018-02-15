@@ -2,11 +2,11 @@ import * as three from 'three';
 import { Mesh } from 'three';
 import { BoxBufferGeometry } from 'three';
 import { Cell } from './Cell';
-import { array } from './array';
+import { array } from './types';
 
 export class Board {
     private field_: Mesh;
-    private cells_: Cell[] = [ ];
+    private cells_: Cell[] = [];
 
     public constructor() {
         this._initField();

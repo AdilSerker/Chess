@@ -1,6 +1,8 @@
 import * as three from 'three';
 import { Mesh } from 'three';
 import { BoxBufferGeometry } from 'three';
+import { Coordinates } from '../../chess/types/Coordinates';
+import { numberColumn, charRow } from './types';
 
 export class Cell {
     static counter: number = 0;
@@ -8,6 +10,7 @@ export class Cell {
     private id_: number;
     private color_: boolean;
     private cell_: Mesh;
+    private coordinate_: Coordinates;
 
     public constructor(x: number, z: number, bool: boolean) {
         this.id_ = ++ Cell.counter;
@@ -25,6 +28,11 @@ export class Cell {
 
         this.cell_.position.x = x * 100;
         this.cell_.position.z = z * 100;
+
+        this.coordinate_ = {
+            char: charRow[z.toString()],
+            num: numberColumn[x.toString()]
+        };
     }
 
     public getCell() {
