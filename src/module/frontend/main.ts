@@ -1,18 +1,20 @@
 import { ChessScene } from './Scene';
-import { Board } from './Board/Board';
-import { PawnModel } from './Piece/Pawn';
-
+import { Chess } from './Chess';
+import { array } from './Board/types';
 const scene = new ChessScene();
-const board = new Board();
+const chess = new Chess();
 
-scene.init();
-const pawn = new PawnModel();
+async function initScene(): Promise<void> {
 
-scene.addElements(board.getBoard());
+    scene.init();
+    const chessState = await chess.initState();
+    scene.addElements(
+        chessState
+    );
+}
+initScene();
 
-window.onload = function() {
+scene.renderLoop();
 
-    scene.renderLoop();
-};
 
 window.addEventListener( 'resize', scene.resizeWindow.bind(scene), false );

@@ -18,7 +18,7 @@ export class Cell {
         const material = new three.MeshStandardMaterial( {
             map: null,
             bumpScale: - 0.05,
-            color: bool ? 0xffffff : 0x000000,
+            color: bool ? 0xbfbfbf : 0x202020,
             metalness: 0.5,
             roughness: 1.0
         } );

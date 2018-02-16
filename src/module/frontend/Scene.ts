@@ -12,7 +12,6 @@ export class ChessScene {
     private controls_: any;
 
     public init(): void {
-
         const container = document.createElement( 'div' );
         document.body.appendChild(container);
 
