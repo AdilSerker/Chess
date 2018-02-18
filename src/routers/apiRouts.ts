@@ -6,6 +6,7 @@ export const router = express.Router();
 
 router.get("/", apiController.getApi);
 router.get("/chess", chessController.getChess);
+router.get("/chess/status", chessController.getStatus);
 router.get("/chess/start", chessController.startChess);
 router.get("/chess/piece", chessController.getPieces);
 router.get("/chess/piece/:id", chessController.choicePiece);

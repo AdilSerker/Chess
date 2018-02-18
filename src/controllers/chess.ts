@@ -7,6 +7,10 @@ export const getChess = (req: Request, res: Response) => {
     res.json(chess.getState());
 };
 
+export const getStatus = (req: Request, res: Response) => {
+    res.json(chess.getStatus());
+};
+
 export const startChess = (req: Request, res: Response) => {
     chess.init();
     res.send('Initial data, chess status = true');
@@ -34,5 +38,5 @@ export const movePiece = (req: Request, res: Response) => {
 };
 
 export const getPieces = (req: Request, res: Response) => {
-    res.json(chess.pieces);
+    res.json(chess.pieces());
 };

@@ -38,13 +38,13 @@ export class Chess {
                 this.pieces_.push(new Pawn({ char: CharIndex[i], num: 2 }, true, ++id));
             }
             this.pieces_.push(new Rook({ char: 'a', num: 1 }, true, ++id));
+            this.pieces_.push(new Rook({ char: 'h', num: 1 }, true, ++id));
             this.pieces_.push(new Knight({ char: 'b', num: 1 }, true, ++id));
+            this.pieces_.push(new Knight({ char: 'g', num: 1 }, true, ++id));
             this.pieces_.push(new Bishop({ char: 'c', num: 1 }, true, ++id));
+            this.pieces_.push(new Bishop({ char: 'f', num: 1 }, true, ++id));
             this.pieces_.push(new Queen({ char: 'd', num: 1 }, true, ++id));
             this.pieces_.push(new King({ char: 'e', num: 1 }, true, ++id));
-            this.pieces_.push(new Bishop({ char: 'f', num: 1 }, true, ++id));
-            this.pieces_.push(new Knight({ char: 'g', num: 1 }, true, ++id));
-            this.pieces_.push(new Rook({ char: 'h', num: 1 }, true, ++id));
 
             /*
             *  init Black Piece
@@ -54,13 +54,13 @@ export class Chess {
                 this.pieces_.push(new Pawn({ char: CharIndex[i], num: 7 }, false, ++id));
             }
             this.pieces_.push(new Rook({ char: 'a', num: 8 }, false, ++id));
+            this.pieces_.push(new Rook({ char: 'h', num: 8 }, false, ++id));
             this.pieces_.push(new Knight({ char: 'b', num: 8 }, false, ++id));
+            this.pieces_.push(new Knight({ char: 'g', num: 8 }, false, ++id));
             this.pieces_.push(new Bishop({ char: 'c', num: 8 }, false, ++id));
+            this.pieces_.push(new Bishop({ char: 'f', num: 8 }, false, ++id));
             this.pieces_.push(new Queen({ char: 'd', num: 8 }, false, ++id));
             this.pieces_.push(new King({ char: 'e', num: 8 }, false, ++id));
-            this.pieces_.push(new Bishop({ char: 'f', num: 8 }, false, ++id));
-            this.pieces_.push(new Knight({ char: 'g', num: 8 }, false, ++id));
-            this.pieces_.push(new Rook({ char: 'h', num: 8 }, false, ++id));
 
             this._setPieces(this.pieces_);
         }
@@ -98,6 +98,10 @@ export class Chess {
         }
     }
 
+    public getStatus() {
+        return this.status;
+    }
+
     public getState(): Board | void {
         return this.board_;
     }
@@ -113,6 +117,8 @@ export class Chess {
                 return item.color !== bool;
             });
         } else {
+            console.log('1111');
+            console.log(this.pieces_);
             pieces = this.pieces_.slice();
         }
         return pieces;

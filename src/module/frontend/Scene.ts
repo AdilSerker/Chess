@@ -1,111 +1,110 @@
 import * as three from 'three';
-import { Scene, PerspectiveCamera, Light, WebGLRenderer, CubeCamera, Object3D } from 'three';
+import { Scene, PerspectiveCamera, Raycaster, Light, WebGLRenderer, CameraHelper, CubeCamera, Object3D, SpotLight, Vector2 } from 'three';
 const OrbitControls = require('./lib/OrbitControls');
 const TrackballControls = require('./lib/TrackballControl');
+require('./lib/ShadowMapViewer');
+import { Chess } from './Chess';
+
 
 export class ChessScene {
-    private scene_: Scene;
-    private camera_: PerspectiveCamera;
-    private cubeCamera_: CubeCamera;
-    private light_: Light;
-    private renderer_: WebGLRenderer;
-    private controls_: any;
+    private chess: Chess;
+    private scene: Scene;
+    private camera: PerspectiveCamera;
+    private cubeCamera: CubeCamera;
+    private light: Light;
+    private lightShadowMap: Light;
+    private renderer: WebGLRenderer;
+    private controls: any;
 
-    public init(): void {
-        const container = document.createElement( 'div' );
-        document.body.appendChild(container);
 
-        this._getScene();
-        this._getCamera();
-        this._getLight();
-        this._setRender(container);
+    public async init(): Promise<void> {
+        this.getScene();
+        await this.getChess();
+        this.getCamera();
+        this.getLight();
+        this.setRender();
     }
 
     public renderLoop() {
         requestAnimationFrame(this.renderLoop.bind(this));
-        this._render();
+        this.render();
     }
 
     public resizeWindow(event: Event) {
-        this.renderer_.setSize(window.innerWidth, window.innerHeight);
-        this.controls_.handleResize();
-        this._updateCamera();
+        this.renderer.setSize(window.innerWidth, window.innerHeight);
+        this.controls.handleResize();
+        this.updateCamera();
     }
 
-    public addElements(...object: Object3D[]): void {
-        this.scene_.add(...object);
+    private async getChess() {
+        this.chess = new Chess();
+        const chessState = await this.chess.initState();
+        this.scene.add(chessState);
+        console.log(this.chess);
     }
 
-    private _render() {
-        this.controls_.update();
-        this.cubeCamera_.update(this.renderer_, this.scene_);
-        this.renderer_.render(this.scene_, this.camera_);
+    private render() {
+        try {
+            this.controls.update();
+            this.cubeCamera.update(this.renderer, this.scene);
+            this.renderer.render(this.scene, this.camera);
+        } catch (error) {
+
+        }
+
     }
 
-    private _setRender(container: HTMLElement): void {
+    private setRender(): void {
+        const container = document.createElement( 'div' );
+        document.body.appendChild(container);
         const renderer = new three.WebGLRenderer( { antialias: true } );
         renderer.setPixelRatio( window.devicePixelRatio );
         renderer.setSize( window.innerWidth, window.innerHeight );
         renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = three.PCFSoftShadowMap;
+
         container.appendChild(renderer.domElement);
-        this.renderer_ = renderer;
+        this.renderer = renderer;
     }
 
-    private _getLight() {
-        this.scene_.add(new three.AmbientLight(0xf0f0f0));
-        const light = new three.SpotLight(0xffffff, 1.5);
+    private getLight() {
+        this.scene.add(new three.AmbientLight(0x000000));
+
+        const light = new SpotLight( 0xffffff, 1.5 );
         light.position.set( 0, 1500, 200 );
         light.castShadow = true;
-        light.shadow = new three.SpotLightShadow( new three.PerspectiveCamera( 70, 1, 200, 2000 ) );
+        light.shadow = new three.SpotLightShadow( new PerspectiveCamera( 180, 1, 20, 3000) );
         light.shadow.bias = -0.000222;
-        light.shadow.mapSize.width = 1024;
-        light.shadow.mapSize.height = 1024;
-        this.scene_.add(light);
-        this.light_ = light;
+        light.shadow.mapSize.width = 2500;
+        light.shadow.mapSize.height = 2500;
+        this.scene.add( light );
+
+        this.light = light;
     }
 
-    private _getCamera() {
-        this.camera_ = new three.PerspectiveCamera(30, window.innerWidth / window.innerHeight, 1, 100000 );
-        this.cubeCamera_ = new three.CubeCamera(1, 10000, 128);
-        this.controls_ = new three.TrackballControls(this.camera_);
+    private getCamera() {
+        this.camera = new three.PerspectiveCamera(30, window.innerWidth / window.innerHeight, 1, 100000 );
+        this.cubeCamera = new three.CubeCamera(1, 10000, 128);
+        this.controls = new three.TrackballControls(this.camera);
 
-        this._resetCamera();
+        this.resetCamera();
     }
 
-    private _resetCamera() {
-        this.camera_.position.set( -366, 3895, 18 );
-        this._updateCamera();
+    private resetCamera() {
+        this.camera.position.set( -366, 3895, 18 );
+        this.updateCamera();
     }
 
-    private _updateCamera() {
-        this.camera_.aspect = window.innerWidth / window.innerHeight;
-        this.camera_.lookAt(new three.Vector3());
-        this.camera_.updateProjectionMatrix();
+    private updateCamera() {
+        this.camera.aspect = window.innerWidth / window.innerHeight;
+        this.camera.lookAt(new three.Vector3());
+        this.camera.updateProjectionMatrix();
     }
 
-    private _getScene() {
+    private getScene() {
         const scene = new three.Scene();
-        scene.background = new three.Color(0xf0f0f0);
-        const geometry = new three.PlaneGeometry(100000, 100000);
-        const material = new three.MeshStandardMaterial( {
-            map: null,
-            bumpScale: - 0.05,
-            color: 0xaaaaaa,
-            metalness: 0.5,
-            roughness: 1.0
-        } );
-        const plane = new three.Mesh(geometry, material);
-        plane.position.set(0, -1800, 0);
-        plane.rotation.x = - Math.PI * 0.5;
+        scene.background = new three.Color(0x000000);
 
-        plane.receiveShadow = true;
-        scene.add(plane);
-
-        const grid = new three.GridHelper(1600, 8);
-        grid.material.opacity = 0.25;
-        grid.material.transparent = true;
-        scene.add(grid);
-
-        this.scene_ = scene;
+        this.scene = scene;
     }
 }

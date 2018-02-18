@@ -35,10 +35,12 @@ export class Board {
             map: null,
             bumpScale: - 0.05,
             color: 0x444444,
-            metalness: 0.5,
+            metalness: 1.5,
             roughness: 1.0
         } );
         this.field_ = new three.Mesh(geometry, material);
         this.field_.position.y = -900;
+        this.field_.castShadow = true;
+        this.field_.receiveShadow = true;
     }
 }
