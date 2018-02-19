@@ -117,8 +117,6 @@ export class Chess {
                 return item.color !== bool;
             });
         } else {
-            console.log('1111');
-            console.log(this.pieces_);
             pieces = this.pieces_.slice();
         }
         return pieces;

@@ -10,6 +10,7 @@ export class Pawn extends Piece {
     static meshPawn: any = null;
 
     public initMesh(): Group {
+
         const x = array[this.coordinate_.num];
         const z = array[KeyIndex[this.coordinate_.char]];
 
@@ -19,7 +20,7 @@ export class Pawn extends Piece {
             color: this.color_ ? 0xffffff : 0x111111,
         });
 
-        const pawnMesh = Pawn.meshPawn.clone(true);
+        const pawnMesh: Group = Pawn.meshPawn.clone(true);
         pawnMesh.traverse(function ( child: any ) {
             if ( child instanceof three.Mesh ) {
                 child.material = material;
@@ -27,11 +28,16 @@ export class Pawn extends Piece {
         });
         pawnMesh.scale.set(100, 100, 100);
         pawnMesh.position.set(x * 100 - 50, 50, z * 100 - 57);
-
+        pawnMesh.name = `${this.id}`;
         pawnMesh.castShadow = true;
         pawnMesh.receiveShadow = true;
+        pawnMesh.children[0].castShadow = true;
+        pawnMesh.children[0].receiveShadow = true;
 
-        return this.mesh_ = pawnMesh;
+
+
+        this.mesh_ = pawnMesh;
+        return pawnMesh;
 
     }
 
@@ -39,14 +45,12 @@ export class Pawn extends Piece {
         const loader = new three.OBJLoader();
         return await new Promise((resolve) => {
             loader.load('obj/PawnLight.obj', (object: Object3D) => {
-
                 Pawn.meshPawn = object;
-
                 resolve(object);
             }, ( xhr ) => {
                 if ( xhr.lengthComputable ) {
                     const percentComplete = xhr.loaded / xhr.total * 100;
-                    console.log( Math.round(percentComplete) + '% downloaded' );
+                    // console.log( Math.round(percentComplete) + '% downloaded' );
                 }
             }, (err) => { });
         });

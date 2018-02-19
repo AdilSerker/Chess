@@ -3,19 +3,23 @@ import { Mesh, Scene, Object3D, Vector3, Group } from 'three';
 import { Coordinates } from '../../chess/types/Coordinates';
 require('../lib/OBJLoader');
 import { Piece } from './Piece';
+import { numberColumn, charRow, array } from '../Board/types';
+import { Coordinates as Position, KeyIndex } from '../../chess/types/Coordinates';
 
 
 export class Rook extends Piece {
     static meshRook: any = null;
 
 
-    public initMesh(x: number, z: number, bool: boolean): Group {
+    public initMesh(): Group {
+
+        const x = array[this.coordinate_.num];
+        const z = array[KeyIndex[this.coordinate_.char]];
+
         const material = new three.MeshStandardMaterial({
             map: null,
             bumpScale: - 0.05,
-            color: bool ? 0xffffff : 0x111111,
-            // metalness: 0.5,
-            // roughness: 1.0
+            color: this.color_ ? 0xffffff : 0x111111,
         });
 
         const rookMesh = Rook.meshRook.clone(true);
@@ -26,7 +30,7 @@ export class Rook extends Piece {
         });
         rookMesh.scale.set(100, 100, 100);
         rookMesh.position.set(x * 100 - 50, 50, z * 100 - 57);
-
+        rookMesh.name = `${this.id}`;
         rookMesh.castShadow = true;
         rookMesh.receiveShadow = true;
 
@@ -45,7 +49,7 @@ export class Rook extends Piece {
             }, ( xhr ) => {
                 if ( xhr.lengthComputable ) {
                     const percentComplete = xhr.loaded / xhr.total * 100;
-                    console.log( Math.round(percentComplete) + '% downloaded' );
+                    // console.log( Math.round(percentComplete) + '% downloaded' );
                 }
             }, (err) => { });
         });

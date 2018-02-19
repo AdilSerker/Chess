@@ -16,14 +16,14 @@ export class Cell {
         this.id_ = ++ Cell.counter;
         const geometry = new three.BoxBufferGeometry(200, 200, 200);
         const material = new three.MeshStandardMaterial( {
-            color: bool ? 0xaeaeae : 0x202020
+            color: bool ? 0xaeaeae : 0x202020,
+            side: three.DoubleSide
         } );
         this.color_ = bool;
         this.cell_ = new three.Mesh(geometry, material);
         this.cell_.position.y = -50;
         this.cell_.castShadow = true;
         this.cell_.receiveShadow = true;
-
         this.cell_.position.x = x * 100;
         this.cell_.position.z = z * 100;
 
