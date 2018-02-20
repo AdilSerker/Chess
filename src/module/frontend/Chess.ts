@@ -15,7 +15,7 @@ import axios, { AxiosPromise } from 'axios';
 
 import { ipAddress } from '../../config/server';
 
-const ip = ipAddress.home;
+const ip = ipAddress.work;
 
 
 export class Chess {
@@ -58,8 +58,6 @@ export class Chess {
             if (item)
                 this.groupMesh_.add(this.initPiece(item));
         });
-        this.groupMesh_.castShadow = true;
-        this.groupMesh_.receiveShadow = true;
 
         return this.groupMesh_;
     }

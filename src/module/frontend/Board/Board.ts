@@ -1,5 +1,5 @@
 import * as three from 'three';
-import { Mesh } from 'three';
+import { Mesh, Group } from 'three';
 import { BoxBufferGeometry } from 'three';
 import { Cell } from './Cell';
 import { array } from './types';
@@ -8,6 +8,8 @@ import { Coordinates } from '../../chess/types/Coordinates';
 export class Board {
     private field_: Mesh;
     private cells_: Cell[] = [];
+    private charRow_: Group[];
+    private columnNum_: Group[];
 
     public constructor() {
         this._initField();
@@ -51,4 +53,8 @@ export class Board {
         this.field_.castShadow = true;
         this.field_.receiveShadow = true;
     }
+
+    // private _initChars() {
+    //     const material = new
+    // }
 }

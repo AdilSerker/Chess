@@ -31,9 +31,8 @@ export class Rook extends Piece {
         rookMesh.scale.set(100, 100, 100);
         rookMesh.position.set(x * 100 - 50, 50, z * 100 - 57);
         rookMesh.name = `${this.id}`;
-        rookMesh.castShadow = true;
-        rookMesh.receiveShadow = true;
-
+        rookMesh.children[0].castShadow = true;
+        rookMesh.children[0].receiveShadow = true;
         return this.mesh_ = rookMesh;
 
     }

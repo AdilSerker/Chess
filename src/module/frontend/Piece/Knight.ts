@@ -38,8 +38,8 @@ export class Knight extends Piece {
             knightMesh.rotation.y = - Math.PI * 0.5;
             knightMesh.position.set(x * 100 + 60, 50, z * 100 - 45);
         }
-        knightMesh.castShadow = true;
-        knightMesh.receiveShadow = true;
+        knightMesh.children[0].castShadow = true;
+        knightMesh.children[0].receiveShadow = true;
         return this.mesh_ = knightMesh;
 
     }

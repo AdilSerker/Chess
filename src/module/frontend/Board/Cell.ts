@@ -22,6 +22,7 @@ export class Cell {
         } );
         this.color_ = bool;
         this.cell_ = new three.Mesh(geometry, material);
+        this.cell_.receiveShadow = true;
         this.cell_.position.y = -50;
         this.cell_.name = `${this.id_}`;
         this.cell_.position.x = x * 100;

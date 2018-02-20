@@ -1,5 +1,5 @@
 import * as three from 'three';
-import { Scene, Projector, PerspectiveCamera, Raycaster, Light, WebGLRenderer, CameraHelper, CubeCamera, Object3D, SpotLight, Vector3, Ray, Vector2 } from 'three';
+import { Scene, Projector, PerspectiveCamera, Raycaster, Light, WebGLRenderer, CameraHelper, CubeCamera, Object3D, SpotLight, Vector3, Ray, Vector2, SpotLightShadow } from 'three';
 const OrbitControls = require('./lib/OrbitControls');
 const TrackballControls = require('./lib/TrackballControl');
 require('./lib/ShadowMapViewer');
@@ -79,18 +79,12 @@ export class ChessScene {
 
     private render() {
         try {
-            // this.cube.rotation.x += 0.05;
-            // this.cube.rotation.y += 0.05;
-            // this.cube.rotation.z += 0.05;
-
-
             this.controls.update();
             this.cubeCamera.update(this.renderer, this.scene);
             this.renderer.render(this.scene, this.camera);
         } catch (error) {
 
         }
-
     }
 
     private setRender(): void {
@@ -107,20 +101,20 @@ export class ChessScene {
     }
 
     private initLight() {
-        const light = new three.SpotLight( 0xffffff, 1.5 );
-        light.position.set( 0, 1500, 200 );
+        const light = new three.SpotLight( 0xffffff, 1.5, 0, Math.PI / 2  );
+        light.position.set( 0, 1000, 0 );
+        light.target.position.set( 0, 0, 0 );
+        light.castShadow = true;
+
+        light.shadow = new three.LightShadow(
+            new three.PerspectiveCamera( 90, 1, 300, 1500 )
+        ) as SpotLightShadow;
+
+        light.shadow.bias = 0.0001;
+        light.shadow.mapSize.width = 1024;
+        light.shadow.mapSize.height = 1024;
+
         this.scene.add( light );
-
-        // light.castShadow = true;
-        // light.shadow.camera.far  = 2000;
-        // light.shadow.camera.castShadow = true;
-
-        // light.shadow.mapSize.width = 2048;
-        // light.shadow.mapSize.height = 2048;
-
-        // light.shadow.bias = -0.0001;
-
-        this.light = light;
     }
 
     private initCamera() {
@@ -146,16 +140,6 @@ export class ChessScene {
         const scene = new three.Scene();
         scene.background = new three.Color(0x000000);
 
-        // const material = new three.MeshStandardMaterial({
-        //     color: Math.random() * 0xffffff,
-        //     side: three.DoubleSide
-        // });
-        // const geometry = new three.BoxBufferGeometry( 200, 200, 200 );
-        // this.cube = new three.Mesh(geometry, material);
-        // this.cube.castShadow = true;
-        // this.cube.receiveShadow = true;
-        // this.cube.position.y = 400;
-        // scene.add(this.cube);
         this.scene = scene;
     }
 }
