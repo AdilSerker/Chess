@@ -12,6 +12,7 @@ export class Cell implements ICell {
     public constructor(id: number, bool: boolean, coordinate: Coordinates) {
         this.id_ = id;
         this.color_ = bool ? 'white' : 'black';
+        this.flash_ = false;
         this.coordinate_ = coordinate;
         this.piece_ = null;
     }

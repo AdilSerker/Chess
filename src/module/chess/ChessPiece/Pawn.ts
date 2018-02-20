@@ -32,7 +32,7 @@ export class Pawn extends Piece {
                 }
             } else {
                 if (board.select(char, n - 1).isEmpty()) {
-                    moves.push({ char, num: n + 1 });
+                    moves.push({ char, num: n - 1 });
                 }
             }
         }
@@ -58,6 +58,42 @@ export class Pawn extends Piece {
             if (CharIndex[index - 1] && n - 1 > 0 &&
                 !board.select(CharIndex[index - 1], n - 1).isEmpty() &&
                 board.select(CharIndex[index - 1], n - 1).getPiece().color !== this.color) {
+                moves.push({ char: CharIndex[index - 1], num: n - 1 });
+            }
+        }
+
+        if (this.color) {
+            if (CharIndex[index + 1] && n <= 8 &&
+                !board.select(CharIndex[index + 1], n).isEmpty() &&
+                board.select(CharIndex[index + 1], n).getPiece().name === 'Pawn' &&
+                board.select(CharIndex[index + 1], n).getPiece().isFirstStep() &&
+                board.select(CharIndex[index + 1], n).getPiece().color !== this.color) {
+                    board.select(CharIndex[index + 1], n).getPiece().enPass();
+                    moves.push({ char: CharIndex[index + 1], num: n + 1 });
+            }
+            if (CharIndex[index - 1] && n <= 8 &&
+                !board.select(CharIndex[index - 1], n).isEmpty() &&
+                board.select(CharIndex[index - 1], n).getPiece().name === 'Pawn' &&
+                board.select(CharIndex[index - 1], n).getPiece().isFirstStep() &&
+                board.select(CharIndex[index - 1], n).getPiece().color !== this.color) {
+                    board.select(CharIndex[index - 1], n).getPiece().enPass();
+                moves.push({ char: CharIndex[index - 1], num: n + 1 });
+            }
+        } else {
+            if (CharIndex[index + 1] && n <= 8 &&
+                !board.select(CharIndex[index + 1], n).isEmpty() &&
+                board.select(CharIndex[index + 1], n).getPiece().name === 'Pawn' &&
+                board.select(CharIndex[index + 1], n).getPiece().isFirstStep() &&
+                board.select(CharIndex[index + 1], n).getPiece().color !== this.color) {
+                    board.select(CharIndex[index + 1], n).getPiece().enPass();
+                moves.push({ char: CharIndex[index + 1], num: n - 1 });
+            }
+            if (CharIndex[index - 1] && n <= 8 &&
+                !board.select(CharIndex[index - 1], n).isEmpty() &&
+                board.select(CharIndex[index - 1], n).getPiece().name === 'Pawn' &&
+                board.select(CharIndex[index - 1], n).getPiece().isFirstStep() &&
+                board.select(CharIndex[index - 1], n).getPiece().color !== this.color) {
+                    board.select(CharIndex[index - 1], n).getPiece().enPass();
                 moves.push({ char: CharIndex[index - 1], num: n - 1 });
             }
         }

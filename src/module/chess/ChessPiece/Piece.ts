@@ -11,6 +11,8 @@ export abstract class Piece implements IPiece {
     protected steps_: number;
     protected legalMove_: Coordinates[];
 
+    protected enPass_ = false;
+
     public constructor(pos: Coordinates, bool: boolean, id: number) {
 
         this.id_ = id;
@@ -34,6 +36,18 @@ export abstract class Piece implements IPiece {
 
     public get color(): boolean {
         return this.color_;
+    }
+
+    public isFirstStep(): boolean {
+        return this.steps_ === 1;
+    }
+
+    public enPass() {
+        this.enPass_ = true;
+    }
+
+    public isEnPass() {
+        return this.enPass_;
     }
 
     public move(pos: Coordinates) {

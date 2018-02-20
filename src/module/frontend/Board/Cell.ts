@@ -9,6 +9,7 @@ export class Cell {
 
     private id_: number;
     private color_: boolean;
+    private flash_: boolean;
     private cell_: Mesh;
     private coordinate_: Coordinates;
 
@@ -22,8 +23,7 @@ export class Cell {
         this.color_ = bool;
         this.cell_ = new three.Mesh(geometry, material);
         this.cell_.position.y = -50;
-        this.cell_.castShadow = true;
-        this.cell_.receiveShadow = true;
+        this.cell_.name = `${this.id_}`;
         this.cell_.position.x = x * 100;
         this.cell_.position.z = z * 100;
 
@@ -33,8 +33,16 @@ export class Cell {
         };
     }
 
+    public get id() {
+        return this.id_;
+    }
+
     public getCell() {
         return this.cell_;
+    }
+
+    public get coordinate() {
+        return { ...this.coordinate_ };
     }
 
     public set color(bool: boolean) {

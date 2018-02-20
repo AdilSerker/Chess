@@ -8,7 +8,7 @@ scene.init();
 scene.renderLoop();
 
 window.addEventListener( 'resize', scene.resizeWindow.bind(scene), false );
-document.addEventListener( 'mousemove', scene.onDocumentMouseMove.bind(scene), false );
+document.addEventListener( 'click', scene.onDocumentMouseDown.bind(scene), false );
 
 document.addEventListener('keydown', (event) => {
     const keyName = event.key;

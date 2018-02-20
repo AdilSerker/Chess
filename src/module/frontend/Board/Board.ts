@@ -3,6 +3,7 @@ import { Mesh } from 'three';
 import { BoxBufferGeometry } from 'three';
 import { Cell } from './Cell';
 import { array } from './types';
+import { Coordinates } from '../../chess/types/Coordinates';
 
 export class Board {
     private field_: Mesh;
@@ -27,6 +28,13 @@ export class Board {
             group.add(item.getCell());
         }
         return group;
+    }
+
+    public getCellById(id: number): Coordinates {
+        const cell = this.cells_.filter((item: Cell) => {
+            return item.id === id;
+        })[0];
+        return cell.coordinate;
     }
 
     private _initField() {

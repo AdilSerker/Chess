@@ -13,11 +13,17 @@ import { Coordinates as Position } from '../chess/types/Coordinates';
 
 import axios, { AxiosPromise } from 'axios';
 
+import { ipAddress } from '../../config/server';
+
+const ip = ipAddress.home;
+
+
 export class Chess {
     private board_: Board;
     private pieces_: any[];
-    static counter = 1;
     private groupMesh_: Group;
+    private selectPiece: any;
+    private legalMove_: any[];
 
     public constructor() {
         this.board_ = new Board();
@@ -35,48 +41,82 @@ export class Chess {
         await King.getGeometry();
 
         let  pieces: any;
-
-        const status = (await axios.get('http://localhost:8888/api/chess/status')).data;
+        const status = (await axios.get(`${ip}/api/chess/status`)).data;
 
         if (!status) {
-            console.log('новая сессия');
-            await axios.get('http://localhost:8888/api/chess/start');
-            pieces = await axios.get('http://localhost:8888/api/chess/piece');
+            console.log(`новая сессия`);
+            await axios.get(`${ip}/api/chess/start`);
+            pieces = await axios.get(`${ip}/api/chess/piece`);
         } else {
-            console.log('восстановление сессии');
-            pieces = await axios.get('http://localhost:8888/api/chess/piece');
+            console.log(`восстановление сессии`);
+            pieces = await axios.get(`${ip}/api/chess/piece`);
         }
 
         this.groupMesh_.add(this.board_.getBoard());
 
         pieces.data.forEach((item: any) => {
-            if (this.initPiece(item))
+            if (item)
                 this.groupMesh_.add(this.initPiece(item));
         });
         this.groupMesh_.castShadow = true;
         this.groupMesh_.receiveShadow = true;
+
         return this.groupMesh_;
     }
+
+    public async choisePiece(id: number): Promise<any> {
+
+        this.legalMove_ = [];
+        try {
+            this.legalMove_ = (await axios.get(`${ip}/api/chess/piece/${id}`)).data;
+            const boardState = (await axios.get(`${ip}/api/chess`)).data;
+        } catch (error) {
+
+        }
+        console.log(this.legalMove_);
+    }
+
+    public async move(cellId: number): Promise<any> {
+        try {
+            if (this.legalMove_ && this.legalMove_.length) {
+                const coordinate: Position = this.board_.getCellById(cellId);
+                const pieces = await axios.post(`${ip}/api/chess/piece/move`, coordinate);
+                this.update(pieces.data);
+            }
+        } catch (error) {
+
+        }
+    }
+
+    private async update(pieces: any[]) {
+        this.groupMesh_.children = this.groupMesh_.children.slice(0, 1);
+        this.pieces_ = [];
+        pieces.forEach((item: any) => {
+            if (item)
+                this.groupMesh_.add(this.initPiece(item));
+        });
+    }
+
 
     private initPiece(piece: any): Object3D {
 
         switch (piece.name_) {
-            case 'Pawn':
+            case `Pawn`:
                 return this._initPawn(piece.id_, piece.pos_, piece.color_);
 
-            case 'Rook':
+            case `Rook`:
                 return this._initRook(piece.id_, piece.pos_, piece.color_);
 
-            case 'Knight':
+            case `Knight`:
                 return this._initKnight(piece.id_, piece.pos_, piece.color_);
 
-            case 'Bishop':
+            case `Bishop`:
                 return this._initBishop(piece.id_, piece.pos_, piece.color_);
 
-            case 'Queen':
+            case `Queen`:
                 return this._initQueen(piece.id_, piece.pos_, piece.color_);
 
-            case 'King':
+            case `King`:
                 return this._initKing(piece.id_, piece.pos_, piece.color_);
 
             default:
