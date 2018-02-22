@@ -68,27 +68,36 @@ export class Chess {
     }
 
     public choicePiece(id: number): Coordinates[] {
-        const board = this.board_;
-        const piece = this._getPiece(id);
-
-        if (piece) {
-            this.choicesPiece_ = piece;
-            this.legalMove_ = piece.select(board);
-            board.flashCells(this.legalMove_);
+        try {
+            const board = this.board_;
+            const piece = this._getPiece(id);
+            console.log(piece);
+            if (piece) {
+                this.choicesPiece_ = piece;
+                this.legalMove_ = piece.select(board);
+                board.flashCells(this.legalMove_);
+            }
+            else {
+                throw new Error('Not Acceptable');
+            }
+            return this.legalMove_;
+        } catch (error) {
+            if (error.message === 'Not Acceptable') {
+                throw new Error('opponent\'s move')
+            } else {
+                throw error;
+            }
         }
-        else {
-            throw new Error('Not Acceptable');
-        }
-        return this.legalMove_;
     }
 
     public move(coordinate: Coordinates): Piece[] {
+        
         const board = this.board_;
         const piece = this.choicesPiece_;
-
         if (JSON.stringify(this.legalMove_)
                 .indexOf(JSON.stringify(coordinate)) !== -1) {
             board.select(piece.position.char, piece.position.num).emptyCell();
+            
             if (!board.select(coordinate.char, coordinate.num).isEmpty()) {
                 board.select(coordinate.char, coordinate.num).emptyCell();
                 this.pieces_ = this.pieces_.filter(piece => {
@@ -97,16 +106,18 @@ export class Chess {
                     false : true;
                 });
             }
-
-            if (!board.select(coordinate.char, coordinate.num - 1).isEmpty() &&
+            
+            if (piece.name === 'Pawn' &&
+                !board.select(coordinate.char, coordinate.num - 1).isEmpty() &&
                 board.select(coordinate.char, coordinate.num - 1).getPiece().isEnPass()) {
+                    
                     board.select(coordinate.char, coordinate.num - 1).emptyCell();
                     this.pieces_ = this.pieces_.filter(piece => {
                         return !piece.isEnPass();
                     });
             }
-
             piece.move(coordinate);
+            
             board.insertPiece(piece);
             board.flashOffAllCells();
 
@@ -118,6 +129,7 @@ export class Chess {
         } else {
             throw new Error('Bad Request');
         }
+    
     }
 
     public getStatus() {

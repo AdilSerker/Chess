@@ -71,7 +71,7 @@ export class Chess {
         } catch (error) {
 
         }
-        console.log(this.legalMove_);
+        
     }
 
     public async move(cellId: number): Promise<any> {
