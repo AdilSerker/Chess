@@ -15,4 +15,4 @@ document.addEventListener('keydown', (event) => {
     if (keyName === 'r') {
         scene.resetCamera();
     }
-  });
+});

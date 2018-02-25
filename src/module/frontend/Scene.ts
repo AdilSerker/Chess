@@ -21,7 +21,7 @@ export class ChessScene {
     private mouse: Vector2;
 
     protected cube: three.Mesh;
-
+    protected initional: boolean = false;
 
     public async init(): Promise<void> {
         this.initScene();
@@ -30,6 +30,8 @@ export class ChessScene {
         this.initControl();
         this.initLight();
         this.setRender();
+
+        this.initional = true;
     }
 
     public renderLoop() {
@@ -78,19 +80,17 @@ export class ChessScene {
     }
 
     private render() {
-        try {
+        if (this.initional) {
             this.controls.update();
             this.cubeCamera.update(this.renderer, this.scene);
             this.renderer.render(this.scene, this.camera);
-        } catch (error) {
-
         }
     }
 
     private setRender(): void {
         const container = document.createElement( 'div' );
         document.body.appendChild(container);
-        const renderer = new three.WebGLRenderer({ antialias: true });
+        const renderer = new three.WebGLRenderer({ antialias: false });
         renderer.setPixelRatio( window.devicePixelRatio );
         renderer.setSize( window.innerWidth, window.innerHeight );
         renderer.shadowMap.enabled = true;

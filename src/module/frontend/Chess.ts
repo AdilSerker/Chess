@@ -15,7 +15,7 @@ import axios, { AxiosPromise } from 'axios';
 
 import { ipAddress } from '../../config/server';
 
-const ip = ipAddress.work;
+const ip = ipAddress.home;
 
 
 export class Chess {
@@ -32,13 +32,14 @@ export class Chess {
     }
 
     public async initState(): Promise<Group> {
-
-        await Pawn.getGeometry();
-        await Rook.getGeometry();
-        await Knight.getGeometry();
-        await Bishop.getGeometry();
-        await Queen.getGeometry();
-        await King.getGeometry();
+        await Promise.all([
+            Pawn.getGeometry(),
+            Rook.getGeometry(),
+            Knight.getGeometry(),
+            Bishop.getGeometry(),
+            Queen.getGeometry(),
+            King.getGeometry() 
+        ]);
 
         let  pieces: any;
         const status = (await axios.get(`${ip}/api/chess/status`)).data;
@@ -67,9 +68,8 @@ export class Chess {
         this.legalMove_ = [];
         try {
             this.legalMove_ = (await axios.get(`${ip}/api/chess/piece/${id}`)).data;
-            const boardState = (await axios.get(`${ip}/api/chess`)).data;
         } catch (error) {
-
+            console.error(error);
         }
         
     }
@@ -82,7 +82,7 @@ export class Chess {
                 this.update(pieces.data);
             }
         } catch (error) {
-
+            console.error(error)
         }
     }
 
