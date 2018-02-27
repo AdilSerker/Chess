@@ -104,7 +104,7 @@ export class ChessScene {
         const light = new three.SpotLight( 0xffffff, 1.5, 0, Math.PI / 2  );
         light.position.set( 0, 1000, 0 );
         light.target.position.set( 0, 0, 0 );
-        light.castShadow = true;
+        light.castShadow = false;
 
         light.shadow = new three.LightShadow(
             new three.PerspectiveCamera( 90, 1, 300, 1500 )

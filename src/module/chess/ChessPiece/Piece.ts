@@ -12,7 +12,6 @@ export abstract class Piece implements IPiece {
     protected legalMove_: Coordinates[];
 
     protected stepNumber: number;
-    protected enPass_: boolean = false;
 
     public constructor(pos: Coordinates, bool: boolean, id: number) {
 
@@ -43,14 +42,6 @@ export abstract class Piece implements IPiece {
         return this.steps_ === 1;
     }
 
-    public enPass() {
-        this.enPass_ = true;
-    }
-
-    public isEnPass() {
-        return this.enPass_;
-    }
-
     public getStepNumber() {
         return this.stepNumber;
     }
@@ -60,12 +51,6 @@ export abstract class Piece implements IPiece {
                 .indexOf(JSON.stringify(pos)) !== -1) {
             this.pos_ = pos;
             this.steps_++;
-            if (this.steps_ > 1) {
-                this.enPass_ = false;
-            }
-            if (stepNumber) {
-                this.stepNumber = stepNumber;
-            }
         } else {
             console.error('Invalid move');
         }
