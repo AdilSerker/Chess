@@ -183,14 +183,12 @@ export class Chess {
             }
 
             if (this.choicesPiece_.name === 'King') {
-                console.log(coordinate.char, 'ход', this.choicesPiece_.position.char, 'позиция короля');
-                if (KeyIndex[coordinate.char] - KeyIndex[this.choicesPiece_.position.char] === 2 || 
+                if (KeyIndex[coordinate.char] - KeyIndex[this.choicesPiece_.position.char] === 2 ||
                     KeyIndex[this.choicesPiece_.position.char] - KeyIndex[coordinate.char] === 2) {
-                        console.log('castling');
-                        this._castling(coordinate);
+
+                    this._castling(coordinate);
                 }
-            } 
-                
+            }
 
             this.choicesPiece_.move(coordinate);
 
@@ -206,7 +204,7 @@ export class Chess {
     }
 
     private _castling(coordinate: Coordinates): void {
-        if(this.queue) {
+        if (this.queue) {
             if (KeyIndex[coordinate.char] - KeyIndex[this.choicesPiece_.position.char] === 2 &&
                 !this._isAttackedSquare({
                     char: CharIndex[KeyIndex[this.choicesPiece_.position.char] + 1],
@@ -265,7 +263,7 @@ export class Chess {
 
         return JSON.stringify(cellAttack).indexOf(
             JSON.stringify(coordinate)) !== -1;
-    } 
+    }
 
     private _makeDump() {
         this.dumpBoard = _.cloneDeep(this.board_);

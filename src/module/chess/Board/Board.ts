@@ -16,13 +16,13 @@ export class Board {
 
     public constructor() {
         let id: number = 1,
-            isWhiteCell = true;
+            booleanColor = true;
 
         for (const key in this.field_) {
-            isWhiteCell = !isWhiteCell;
+            booleanColor = !booleanColor;
             for (let i = 1; i <= 8; ++i) {
-                this.field_[key].push(new Cell(id++, isWhiteCell, { char: key, num: i }));
-                isWhiteCell = !isWhiteCell;
+                this.field_[key].push(new Cell(id++, booleanColor, { char: key, num: i }));
+                booleanColor = !booleanColor;
             }
         }
     }
