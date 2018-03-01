@@ -11,8 +11,6 @@ export abstract class Piece implements IPiece {
     protected steps_: number;
     protected legalMove_: Coordinates[];
 
-    protected stepNumber: number;
-
     public constructor(pos: Coordinates, bool: boolean, id: number) {
 
         this.id_ = id;
@@ -24,6 +22,10 @@ export abstract class Piece implements IPiece {
 
     public get id(): number {
         return this.id_;
+    }
+
+    public isNotMove(): boolean {
+        return this.steps_ === 0;
     }
 
     public get position(): Coordinates {
@@ -42,13 +44,10 @@ export abstract class Piece implements IPiece {
         return this.steps_ === 1;
     }
 
-    public getStepNumber() {
-        return this.stepNumber;
-    }
-
-    public move(pos: Coordinates, stepNumber?: number) {
+    public move(pos: Coordinates) {
         if (JSON.stringify(this.legalMove_)
                 .indexOf(JSON.stringify(pos)) !== -1) {
+
             this.pos_ = pos;
             this.steps_++;
         } else {
@@ -56,6 +55,5 @@ export abstract class Piece implements IPiece {
         }
     }
 
-
-    public abstract select(board: Board): Coordinates[];
+    public abstract select(board: Board, stepCount?: number): Coordinates[];
 }

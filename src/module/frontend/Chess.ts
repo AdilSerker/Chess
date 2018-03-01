@@ -17,7 +17,6 @@ import { ipAddress } from '../../config/server';
 
 const ip = ipAddress.home;
 
-
 export class Chess {
     private board_: Board;
     private pieces_: any[];
