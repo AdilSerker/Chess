@@ -11,6 +11,8 @@ export abstract class Piece implements IPiece {
     protected steps_: number;
     protected legalMove_: Coordinates[];
 
+    public enPassant: boolean;
+
     public constructor(pos: Coordinates, bool: boolean, id: number) {
 
         this.id_ = id;

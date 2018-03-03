@@ -75,7 +75,7 @@ export class Chess {
                 throw error;
             }
         }
-    }
+    } 
 
     public move(coordinate: Coordinates): Piece[] {
         try {
@@ -87,16 +87,17 @@ export class Chess {
                 throw new Error('move on check');
             } else {
                 this.queue = !this.queue;
-
+                
                 return this.pieces_;
             }
         } catch (error) {
+            console.log(error);
             if (error.message === 'Bad Request') {
 
                 throw new Error('opponent\'s move')
             } else {
-
                 throw error;
+                
             }
         }
     }
@@ -169,12 +170,16 @@ export class Chess {
     }
 
     private _move(coordinate: Coordinates): void {
-        if (this._isLegalMove(coordinate)) {
-            this.board_.select(this.choicesPiece_.position.char,
-                this.choicesPiece_.position.num).emptyCell();
+        let char = this.choicesPiece_.position.char,
+            num = this.choicesPiece_.position.num,
+            index = KeyIndex[char],
+            board = this.board_;
 
-            if (!this.board_.select(coordinate.char, coordinate.num).isEmpty()) {
-                this.board_.select(coordinate.char, coordinate.num).emptyCell();
+        if (this._isLegalMove(coordinate)) {
+            board.select(char, num).emptyCell();
+
+            if (!board.select(coordinate.char, coordinate.num).isEmpty()) {
+                board.select(coordinate.char, coordinate.num).emptyCell();
                 this.pieces_ = this.pieces_.filter(piece => {
                     return piece.position.char === coordinate.char
                         && piece.position.num === coordinate.num ?
@@ -183,11 +188,70 @@ export class Chess {
             }
 
             if (this.choicesPiece_.name === 'King') {
-                if (KeyIndex[coordinate.char] - KeyIndex[this.choicesPiece_.position.char] === 2 ||
-                    KeyIndex[this.choicesPiece_.position.char] - KeyIndex[coordinate.char] === 2) {
+                if (KeyIndex[coordinate.char] - KeyIndex[char] === 2 ||
+                    KeyIndex[char] - KeyIndex[coordinate.char] === 2) {
 
                     this._castling(coordinate);
                 }
+            }
+
+            if (this.choicesPiece_.name === 'Pawn') {
+                
+                if (this.queue) {
+                    
+                    if (this.choicesPiece_.isNotMove() && 
+                        coordinate.num - num === 2) {
+                            
+                            this.choicesPiece_.enPassant = true;
+                    } else
+                    if (!board.select(coordinate.char, coordinate.num - 1).isEmpty() &&
+                        board.select(coordinate.char, coordinate.num - 1).getPiece().enPassant) {
+
+                        const id = board.select(coordinate.char, coordinate.num - 1).getPiece().id;
+                        board.select(coordinate.char, coordinate.num - 1).emptyCell();
+
+                        this.pieces_ = this.pieces_.filter(item => {
+                            return item.id !== id;
+                        });
+
+                        this.pieces_.forEach(item => {
+                            item.enPassant = false;
+                        });
+
+                    } else {
+                        this.pieces_.forEach(item => {
+                            item.enPassant = false;
+                        });
+                    }
+                } else {
+                    if(this.choicesPiece_.isNotMove() && 
+                        num - coordinate.num === 2) {
+                            this.choicesPiece_.enPassant = true;
+                    } else
+                    if (!board.select(coordinate.char, coordinate.num - 1).isEmpty() &&
+                        board.select(coordinate.char, coordinate.num + 1).getPiece().enPassant) {
+                        
+                        const id = board.select(coordinate.char, coordinate.num + 1).getPiece().id;
+                        board.select(coordinate.char, coordinate.num + 1).emptyCell();
+
+                        this.pieces_ = this.pieces_.filter(item => {
+                            return item.id !== id;
+                        });
+
+                        this.pieces_.forEach(item => {
+                            item.enPassant = false;
+                        });
+
+                    } else {
+                        this.pieces_.forEach(item => {
+                            item.enPassant = false;
+                        });
+                    }
+                }
+            } else {
+                this.pieces_.forEach(item => {
+                    item.enPassant = false;
+                });
             }
 
             this.choicesPiece_.move(coordinate);
@@ -288,7 +352,7 @@ export class Chess {
         opponentPieces.forEach(function (item: Piece) {
             cellAttack = cellAttack.concat(item.select(this.board_));
         }.bind(this));
-
+        
         const kingPosition = this.queue ?
             this._getPiece(16).position : this._getPiece(32).position;
 

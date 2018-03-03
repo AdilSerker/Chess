@@ -39,7 +39,7 @@ export class Pawn extends Piece {
         }
 
         if (this.color) {
-
+            
             if (CharIndex[index + 1] && n + 1 <= 8 &&
                 !board.select(CharIndex[index + 1], n + 1).isEmpty() &&
                 board.select(CharIndex[index + 1], n + 1).getPiece().color !== this.color) {
@@ -50,7 +50,22 @@ export class Pawn extends Piece {
                 !board.select(CharIndex[index - 1], n + 1).isEmpty() &&
                 board.select(CharIndex[index - 1], n + 1).getPiece().color !== this.color) {
                 moves.push({ char: CharIndex[index - 1], num: n + 1 });
-            }   
+            }
+            if (CharIndex[index - 1] && n === 5 &&
+                !board.select(CharIndex[index - 1], n).isEmpty() &&
+                board.select(CharIndex[index - 1], n).getPiece().enPassant &&
+                board.select(CharIndex[index - 1], n).getPiece().isFirstStep()) {
+                    console.log('pawn left');
+                    moves.push({ char: CharIndex[index - 1], num: n + 1 });
+            }
+
+            if (CharIndex[index + 1] && n === 5 &&
+                !board.select(CharIndex[index + 1], n).isEmpty() &&
+                board.select(CharIndex[index + 1], n).getPiece().enPassant &&
+                board.select(CharIndex[index + 1], n).getPiece().isFirstStep()) {
+                    console.log('pawn right');
+                    moves.push({ char: CharIndex[index + 1], num: n + 1 });
+            }
 
         } else {
 
@@ -64,6 +79,20 @@ export class Pawn extends Piece {
                 !board.select(CharIndex[index - 1], n - 1).isEmpty() &&
                 board.select(CharIndex[index - 1], n - 1).getPiece().color !== this.color) {
                 moves.push({ char: CharIndex[index - 1], num: n - 1 });
+            }
+
+            if (CharIndex[index - 1] && n === 4 &&
+                !board.select(CharIndex[index - 1], n).isEmpty() &&
+                board.select(CharIndex[index - 1], n).getPiece().enPassant &&
+                board.select(CharIndex[index - 1], n).getPiece().isFirstStep()) {
+                    moves.push({ char: CharIndex[index - 1], num: n - 1 });
+            }
+
+            if (CharIndex[index + 1] && n === 4 &&
+                !board.select(CharIndex[index + 1], n).isEmpty() &&
+                board.select(CharIndex[index + 1], n).getPiece().enPassant &&
+                board.select(CharIndex[index + 1], n).getPiece().isFirstStep()) {
+                    moves.push({ char: CharIndex[index + 1], num: n - 1 });
             }
 
         }
