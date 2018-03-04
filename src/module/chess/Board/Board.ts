@@ -14,6 +14,8 @@ export class Board {
         h: [ null ]
     };
 
+    private counter: number = 0;
+
     public constructor() {
         let id: number = 1,
             booleanColor = true;
@@ -48,6 +50,27 @@ export class Board {
                     cell.flashOff();
                 }
             });
+        }
+    }
+
+    public getPieces(bool: boolean): Piece[] {
+        let pieces: Piece[] = [];
+        
+        try {
+            for (const key in this.field_) {
+                for (let i = 1; i <= 8; ++i) {
+                    if (this.field_[key][i] && !this.field_[key][i].isEmpty()) {
+                        if (this.field_[key][i].getPiece().color === bool) {
+                            const piece = this.field_[key][i].getPiece();
+                            
+                            pieces.push(piece);
+                        }
+                    }
+                }
+            }
+            return pieces;
+        } catch (error) {
+            throw error;
         }
     }
 }

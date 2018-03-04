@@ -13,80 +13,101 @@ export class King extends Piece {
         const char: string = this.pos_.char;
         const num: number = this.pos_.num;
         const index: number = KeyIndex[char];
-        const moves: Coordinates[] = [];
+        let moves: Coordinates[] = [];
+        
+        const row = this.color_ ? 1 : 8;
 
         if (num + 1 <= 8 && 
             (board.select(char, num + 1).isEmpty() ||
-            board.select(char, num + 1).getPiece().color !== this.color)) {
+            board.select(char, num + 1).getPiece().color !== this.color)
+        ) {
                 moves.push({ char, num: num + 1 });
         }
         
         if (num + 1 <= 8 && index + 1 <= 8 &&
             (board.select(CharIndex[index + 1], num + 1).isEmpty() ||
-            board.select(CharIndex[index + 1], num + 1).getPiece().color !== this.color)) {
+            board.select(CharIndex[index + 1], num + 1).getPiece().color !== this.color) 
+        ) {
                 moves.push({ char: CharIndex[index + 1], num: num + 1 });
         }
-        
+        //right
         if (index + 1 <= 8 && 
             (board.select(CharIndex[index + 1], num).isEmpty() ||
-            board.select(CharIndex[index + 1], num).getPiece().color !== this.color)) {
+            board.select(CharIndex[index + 1], num).getPiece().color !== this.color)
+        ) {
                 moves.push({ char: CharIndex[index + 1], num });
         }
         
         if (num - 1 > 0 && index + 1 <= 8 &&
             (board.select(CharIndex[index + 1], num - 1).isEmpty() ||
-            board.select(CharIndex[index + 1], num - 1).getPiece().color !== this.color)) {
+            board.select(CharIndex[index + 1], num - 1).getPiece().color !== this.color)
+        ) {
                 moves.push({ char: CharIndex[index + 1], num: num - 1 });
         }
-        
+        //left
         if (index - 1 > 0 && 
             (board.select(CharIndex[index - 1], num).isEmpty() ||
-            board.select(CharIndex[index - 1], num).getPiece().color !== this.color)) {
+            board.select(CharIndex[index - 1], num).getPiece().color !== this.color)
+        ) {
                 moves.push({ char: CharIndex[index - 1], num });
         }
         
         if (num - 1 > 0 && index - 1 > 0 &&
             (board.select(CharIndex[index - 1], num - 1).isEmpty() ||
-            board.select(CharIndex[index - 1], num - 1).getPiece().color !== this.color)) {
+            board.select(CharIndex[index - 1], num - 1).getPiece().color !== this.color) 
+        ) {
                 moves.push({ char: CharIndex[index - 1], num: num - 1 });
         }
         
         if (num - 1 > 0 && 
             (board.select(char, num - 1).isEmpty() ||
-            board.select(char, num - 1).getPiece().color !== this.color)) {
+            board.select(char, num - 1).getPiece().color !== this.color)
+        ) {
                 moves.push({ char, num: num - 1 });
         }
         
         if (num + 1 <= 8 && index - 1 <= 8 &&
             (board.select(CharIndex[index - 1], num + 1).isEmpty() ||
-            board.select(CharIndex[index - 1], num + 1).getPiece().color !== this.color)) {
+            board.select(CharIndex[index - 1], num + 1).getPiece().color !== this.color)
+        ) {
                 moves.push({ char: CharIndex[index - 1], num: num + 1 });
         }
 
-        if (this.color_) {
-            if (!this.steps_ && !board.select('a', 1).isEmpty() &&
-                board.select('a', 1).getPiece().isNotMove() && board.select('b', 1).isEmpty() &&
-                board.select('c', 1).isEmpty() && board.select('d', 1).isEmpty()) {
-                    moves.push({ char: 'c', num: 1 });
-            }
-            if (!this.steps_ && !board.select('h', 1).isEmpty() &&
-                board.select('h', 1).getPiece().isNotMove() && 
-                board.select('g', 1).isEmpty() && board.select('f', 1).isEmpty()) {
-                    moves.push({ char: 'g', num: 1 });
-            }
-        } else {
-            if (!this.steps_ && !board.select('h', 8).isEmpty() &&
-                board.select('h', 8).getPiece().isNotMove() && 
-                board.select('g', 8).isEmpty() && board.select('f', 8).isEmpty()) {
-                    moves.push({ char: 'g', num: 8 });
-            }
-            if (!this.steps_ && !board.select('a', 8).isEmpty() &&
-                board.select('a', 8).getPiece().isNotMove() && board.select('b', 8).isEmpty() &&
-                board.select('c', 8).isEmpty() && board.select('d', 8).isEmpty()) {
-                    moves.push({ char: 'c', num: 8 });
+        if (!this.steps_ && !board.select('a', row).isEmpty() &&
+            board.select('a', row).getPiece().isNotMove() && 
+            board.select('b', row).isEmpty() &&
+            board.select('c', row).isEmpty() && 
+            board.select('d', row).isEmpty() &&
+            !this._isSquareAttacked({ char: 'e', num: row }, board) &&
+            !this._isSquareAttacked({ char: 'd', num: row }, board) &&
+            !this._isSquareAttacked({ char: 'c', num: row }, board) 
+        ) {
+                moves.push({ char: 'c', num: row });
+        }
+
+        if (!this.steps_ && !board.select('h', row).isEmpty() &&
+            board.select('h', row).getPiece().isNotMove() && 
+            board.select('g', row).isEmpty() && 
+            board.select('f', row).isEmpty() &&
+            !this._isSquareAttacked({ char: 'e', num: row }, board) &&
+            !this._isSquareAttacked({ char: 'f', num: row }, board) &&
+            !this._isSquareAttacked({ char: 'g', num: row }, board)
+        ) {
+                moves.push({ char: 'g', num: row });
+        }
+        console.log(moves);
+        return this.legalMove_ = moves;
+    }
+    
+    private _isSquareAttacked(square: Coordinates, board: Board): boolean {
+        const enemys: Piece[] = board.getPieces(!this.color);
+        for (let i = 0; i < enemys.length; ++i) {
+            if (enemys[i].name !== 'King') {
+                if (JSON.stringify(enemys[i].select(board)).indexOf(JSON.stringify(square)) !== -1) {
+                    return true;
+                }
             }
         }
-        
-        return this.legalMove_ = moves;
+        return false;
     }
 }

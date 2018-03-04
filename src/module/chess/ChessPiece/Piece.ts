@@ -47,6 +47,8 @@ export abstract class Piece implements IPiece {
     }
 
     public move(pos: Coordinates) {
+        console.log(this.legalMove_);
+        console.log(pos);
         if (JSON.stringify(this.legalMove_)
                 .indexOf(JSON.stringify(pos)) !== -1) {
 

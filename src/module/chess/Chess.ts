@@ -18,6 +18,7 @@ export class Chess {
     private queue: boolean = true;
     private legalMoves_: Coordinates[];
     private choicesPiece_: Piece;
+    private changePawn_: boolean = false;
 
     private pieceId: number;
 
@@ -39,42 +40,44 @@ export class Chess {
 
         if (!this.status) {
             this.status = true;
-
+            this.pieces_ = [];
             this._initWhitePieces();
             this._initBlackPieces();
-
+            this.queue = true;
+            this.legalMoves_ = [];
+            this.changePawn_ = false;
             this._setPieces(this.pieces_);
         }
     }
 
     public choicePiece(id: number): Coordinates[] {
         try {
-            const piece: Piece = this._getPiece(id);
-
-            if (piece) {
-                if (piece.name === 'Pawn') {
+            if (!this.changePawn_) {
+                const piece: Piece = this._getPiece(id);
+                
+                if (piece) {
                     this.choicesPiece_ = piece;
                     this.legalMoves_ = piece.select(this.board_);
                     console.log(this.legalMoves_);
+
+                    this.board_.flashCells(this.legalMoves_);
+
+                    return this.legalMoves_;
                 } else {
-                    this.choicesPiece_ = piece;
-                    this.legalMoves_ = piece.select(this.board_);
-                    console.log(this.legalMoves_);
+                    throw new Error('NOT ACCEPTABLE');
                 }
-
-                this.board_.flashCells(this.legalMoves_);
-
-                return this.legalMoves_;
             } else {
-                throw new Error('Not Acceptable');
+                throw new Error('Change Pawn');
             }
+            
         } catch (error) {
-            if (error.message === 'Not Acceptable') {
+            if (error.message === 'NOT ACCEPTABLE') {
                 throw new Error('opponent\'s move')
             } else {
                 throw error;
             }
         }
+
     } 
 
     public move(coordinate: Coordinates): Piece[] {
@@ -91,19 +94,17 @@ export class Chess {
                 return this.pieces_;
             }
         } catch (error) {
-            console.log(error);
-            if (error.message === 'Bad Request') {
-
-                throw new Error('opponent\'s move')
-            } else {
-                throw error;
-                
-            }
+            console.error(error);
+            throw error;
         }
     }
 
     public getStatus() {
         return this.status;
+    }
+
+    public setStatus(bool: boolean): void {
+        this.status = bool;
     }
 
     public getState(): Board | void {
@@ -114,10 +115,63 @@ export class Chess {
         return this._getPieces(bool);
     }
 
+    public changePawn(piece: string): Piece[] {
+        if (this.changePawn_) {
+            let pieces = this._getPieces(!this.queue);
+            const row  = this.queue ? 1 : 8;
+            const pawn = pieces.filter(item => {
+                return item.name === 'Pawn' && 
+                    item.position.num === row;
+            })[0];
+            console.log('')
+            this._insertPiece(piece, pawn);
+            this.changePawn_ = false;
+        }
+        return this.pieces_;
+    }
 
     /**
      * PRIVATE
      */
+
+    private _delPiece(coordinate: Coordinates): void {
+        this.pieces_ = this.pieces_.filter(piece => {
+            return piece.position.char === coordinate.char
+                && piece.position.num === coordinate.num ?
+                false : true;
+        });
+    }
+
+    private _insertPiece(piece: string, pawn: Piece): void {
+        switch (piece) {
+            case 'Queen':
+                const queen = new Queen(pawn.position, pawn.color, pawn.id);
+                this._delPiece(pawn.position);
+                this.pieces_.push(queen);
+                this.board_.insertPiece(queen);
+                break;
+            case 'Rook':
+                const rook = new Rook(pawn.position, pawn.color, pawn.id);
+                this._delPiece(pawn.position);
+                this.pieces_.push(rook);
+                this.board_.insertPiece(rook);
+                break;
+            case 'Bishop':
+                const bishop = new Bishop(pawn.position, pawn.color, pawn.id);
+                this._delPiece(pawn.position);
+                this.pieces_.push(bishop);            
+                this.board_.insertPiece(bishop)
+                break;
+            case 'Knight': 
+                const knight = new Knight(pawn.position, pawn.color, pawn.id);
+                this._delPiece(pawn.position);
+                this.pieces_.push(knight);            
+                this.board_.insertPiece(knight)
+                break;
+            default:
+                break;
+        }
+    }
 
     private _getPieces(bool?: boolean): Piece[] {
         let pieces: Piece[] = [];
@@ -190,19 +244,24 @@ export class Chess {
             if (this.choicesPiece_.name === 'King') {
                 if (KeyIndex[coordinate.char] - KeyIndex[char] === 2 ||
                     KeyIndex[char] - KeyIndex[coordinate.char] === 2) {
-
-                    this._castling(coordinate);
+                        
+                        this._castling(coordinate);
                 }
             }
 
             if (this.choicesPiece_.name === 'Pawn') {
                 this._pawnMove(coordinate);
-                
             } else {
                 this._unEnPass();
             }
 
             this.choicesPiece_.move(coordinate);
+
+            const row = this.queue ? 8 : 1;
+            if (this.choicesPiece_.position.num === row && this.choicesPiece_.name === 'Pawn') {
+                console.log(this.choicesPiece_);
+                this.changePawn_ = true;
+            }
 
             this.board_.insertPiece(this.choicesPiece_);
 
@@ -221,46 +280,22 @@ export class Chess {
             index = KeyIndex[char],
             board = this.board_;
 
-        if (this.queue) {
-                
-            if (this.choicesPiece_.isNotMove() && 
-                coordinate.num - num === 2) {
-                    
-                    this.choicesPiece_.enPassant = true;
-            } else if (!board.select(coordinate.char, coordinate.num - 1).isEmpty() &&
-                board.select(coordinate.char, coordinate.num - 1).getPiece().enPassant) {
+        let step = this.queue ? coordinate.num - num : num - coordinate.num;
+        let cell = this.queue ? coordinate.num - 1 : coordinate.num + 1;
 
-                const id = board.select(coordinate.char, coordinate.num - 1).getPiece().id;
-                board.select(coordinate.char, coordinate.num - 1).emptyCell();
-
+        if (this.choicesPiece_.isNotMove() && step === 2) {
+            this.choicesPiece_.enPassant = true;
+        } else if (!board.select(coordinate.char, cell).isEmpty() &&
+            board.select(coordinate.char, cell).getPiece().color !== this.choicesPiece_.color &&
+            board.select(coordinate.char, cell).getPiece().enPassant) {
+                const id = board.select(coordinate.char, cell).getPiece().id;
+                board.select(coordinate.char, cell).emptyCell();
                 this.pieces_ = this.pieces_.filter(item => {
                     return item.id !== id;
                 });
-
                 this._unEnPass();
-
-            } else {
-                this._unEnPass();
-            }
         } else {
-            if(this.choicesPiece_.isNotMove() && 
-                num - coordinate.num === 2) {
-                    this.choicesPiece_.enPassant = true;
-            } else if (!board.select(coordinate.char, coordinate.num + 1).isEmpty() &&
-                board.select(coordinate.char, coordinate.num + 1).getPiece().enPassant) {
-                
-                const id = board.select(coordinate.char, coordinate.num + 1).getPiece().id;
-                board.select(coordinate.char, coordinate.num + 1).emptyCell();
-
-                this.pieces_ = this.pieces_.filter(item => {
-                    return item.id !== id;
-                });
-
-                this._unEnPass();
-
-            } else {
-                this._unEnPass();
-            }
+            this._unEnPass();
         }
     }
 
@@ -271,53 +306,36 @@ export class Chess {
     }
 
     private _castling(coordinate: Coordinates): void {
-        if (this.queue) {
-            if (KeyIndex[coordinate.char] - KeyIndex[this.choicesPiece_.position.char] === 2 &&
-                !this._isAttackedSquare({
-                    char: CharIndex[KeyIndex[this.choicesPiece_.position.char] + 1],
-                    num: this.choicesPiece_.position.num
-                })
-            ) {
-                const rook = this.board_.select('h', 1).getPiece();
-                this.board_.select('h', 1).emptyCell();
-                rook.move({ char: 'f', num: 1 });
-                this.board_.insertPiece(rook);
-            }
-            if (KeyIndex[this.choicesPiece_.position.char] - KeyIndex[coordinate.char] === 2 &&
-                !this._isAttackedSquare({
-                    char: CharIndex[KeyIndex[this.choicesPiece_.position.char] - 1],
-                    num: this.choicesPiece_.position.num
-                })
-            ) {
-                const rook = this.board_.select('a', 1).getPiece();
-                this.board_.select('a', 1).emptyCell();
-                rook.move({ char: 'd', num: 1 });
-                this.board_.insertPiece(rook);
-            }
-        } else {
-            if (KeyIndex[coordinate.char] - KeyIndex[this.choicesPiece_.position.char] === 2 &&
-                !this._isAttackedSquare({
-                    char: CharIndex[KeyIndex[this.choicesPiece_.position.char] + 1],
-                    num: this.choicesPiece_.position.num
-                })
-            ) {
-                const rook = this.board_.select('h', 8).getPiece();
-                this.board_.select('h', 8).emptyCell();
-                rook.move({ char: 'f', num: 8 });
-                this.board_.insertPiece(rook);
-            }
-            if (KeyIndex[this.choicesPiece_.position.char] - KeyIndex[coordinate.char] === 2 &&
-                !this._isAttackedSquare({
-                    char: CharIndex[KeyIndex[this.choicesPiece_.position.char] - 1],
-                    num: this.choicesPiece_.position.num
-                })
-            ) {
-                const rook = this.board_.select('a', 8).getPiece();
-                this.board_.select('a', 8).emptyCell();
-                rook.move({ char: 'd', num: 8 });
-                this.board_.insertPiece(rook);
-            }
+        let char = this.choicesPiece_.position.char,
+            num = this.choicesPiece_.position.num,
+            index = KeyIndex[char],
+            board = this.board_;
+
+        if (KeyIndex[coordinate.char] - index === 2) {
+                console.log('short castling');
+                const rook = board.select('h', num).getPiece();
+
+                rook.select(board);
+                console.log(rook);
+                board.select('h', num).emptyCell();
+                
+                rook.move({ char: 'f', num });
+                board.insertPiece(rook);
+                console.log(JSON.stringify(this.board_))
         }
+        if (index - KeyIndex[coordinate.char] === 2) {
+                console.log('long castling');
+                const rook = board.select('a', num).getPiece();
+
+                rook.select(board);
+                console.log(rook);
+                board.select('a', num).emptyCell();
+
+                rook.move({ char: 'd', num });
+                board.insertPiece(rook);
+                console.log(JSON.stringify(rook));
+        }
+
     }
 
     private _isAttackedSquare(coordinate: Coordinates): boolean {
@@ -348,7 +366,7 @@ export class Chess {
         });
     }
 
-    private _isCheck(): boolean {
+    private  _isCheck(): boolean {
         let cellAttack: Coordinates[] = [];
 
         const opponentPieces: Piece[] = this._getPieces(!this.queue);

@@ -1,5 +1,5 @@
 import * as three from 'three';
-import { Scene, Projector, PerspectiveCamera, Raycaster, Light, WebGLRenderer, CameraHelper, CubeCamera, Object3D, SpotLight, Vector3, Ray, Vector2, SpotLightShadow } from 'three';
+import { Scene, Projector, PerspectiveCamera, Raycaster, Light, WebGLRenderer, CameraHelper, CubeCamera, Object3D, SpotLight, Vector3, Ray, Vector2, SpotLightShadow, AmbientLight } from 'three';
 const OrbitControls = require('./lib/OrbitControls');
 const TrackballControls = require('./lib/TrackballControl');
 require('./lib/ShadowMapViewer');
@@ -21,7 +21,7 @@ export class ChessScene {
     private mouse: Vector2;
 
     protected cube: three.Mesh;
-    protected initional: boolean = false;
+    protected initialized: boolean = false;
 
     public async init(): Promise<void> {
         this.initScene();
@@ -31,7 +31,7 @@ export class ChessScene {
         this.initLight();
         this.setRender();
 
-        this.initional = true;
+        this.initialized = true;
     }
 
     public renderLoop() {
@@ -80,7 +80,7 @@ export class ChessScene {
     }
 
     private render() {
-        if (this.initional) {
+        if (this.initialized) {
             this.controls.update();
             this.cubeCamera.update(this.renderer, this.scene);
             this.renderer.render(this.scene, this.camera);

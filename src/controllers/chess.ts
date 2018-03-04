@@ -16,12 +16,12 @@ export const startChess = (req: Request, res: Response) => {
     res.send('Initial data, chess status = true');
 };
 
-
 export const choicePiece = (req: Request, res: Response) => {
     try {
         res.json(chess.choicePiece(req.params.id));
     } catch (error) {
         res.status(406);
+        console.error(error.message);
         res.send(error.message);
     }
 
@@ -29,9 +29,21 @@ export const choicePiece = (req: Request, res: Response) => {
 
 export const movePiece = (req: Request, res: Response) => {
     try {
+    
         res.json(chess.move({ ...req.body }));
     } catch (error) {
         res.status(400);
+        console.error(error.message);
+        res.send(error.message);
+    }
+};
+
+export const changePawn = (req: Request, res: Response) => {
+    try {
+        res.json(chess.changePawn(req.body.name));
+    } catch (error) {
+        res.status(400);
+        console.error(error.message);
         res.send(error.message);
     }
 };
