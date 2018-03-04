@@ -101,7 +101,7 @@ export class ChessScene {
     }
 
     private initLight() {
-        const light = new three.SpotLight( 0xffffff, 1.5, 0, Math.PI / 2  );
+        const light = new three.SpotLight( 0xffffff, 1, 0, Math.PI / 2  );
         light.position.set( 0, 1000, 0 );
         light.target.position.set( 0, 0, 0 );
         light.castShadow = false;
@@ -114,7 +114,11 @@ export class ChessScene {
         light.shadow.mapSize.width = 1024;
         light.shadow.mapSize.height = 1024;
 
-        this.scene.add( light );
+        const light2 = new three.SpotLight( 0xf0f0f0, 0.5, 0, Math.PI / 2  );
+        light2.position.set( -3000, 5000, -3000 );
+        light2.target.position.set( 0, 0, 0 );
+
+        this.scene.add( light, light2 );
     }
 
     private initCamera() {

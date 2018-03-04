@@ -15,7 +15,7 @@ export class Cell {
 
     public constructor(x: number, z: number, bool: boolean) {
         this.id_ = ++ Cell.counter;
-        const geometry = new three.BoxBufferGeometry(200, 200, 200);
+        const geometry = new three.BoxBufferGeometry(200, 50, 200);
         const material = new three.MeshStandardMaterial( {
             color: bool ? 0xaeaeae : 0x202020,
             side: three.DoubleSide
@@ -23,7 +23,7 @@ export class Cell {
         this.color_ = bool;
         this.cell_ = new three.Mesh(geometry, material);
         this.cell_.receiveShadow = true;
-        this.cell_.position.y = -50;
+        this.cell_.position.y = 20;
         this.cell_.name = `${this.id_}`;
         this.cell_.position.x = x * 100;
         this.cell_.position.z = z * 100;

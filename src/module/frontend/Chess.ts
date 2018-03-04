@@ -37,7 +37,8 @@ export class Chess {
             Knight.getGeometry(),
             Bishop.getGeometry(),
             Queen.getGeometry(),
-            King.getGeometry() 
+            King.getGeometry(),
+            Board.getFont()
         ]);
 
         let  pieces: any;
@@ -51,8 +52,8 @@ export class Chess {
             console.log(`восстановление сессии`);
             pieces = await axios.get(`${ip}/api/chess/piece`);
         }
-
-        this.groupMesh_.add(this.board_.getBoard());
+        const board = await this.board_.getBoard()
+        this.groupMesh_.add(board);
 
         pieces.data.forEach((item: any) => {
             if (item)
