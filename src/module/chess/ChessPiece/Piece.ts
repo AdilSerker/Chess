@@ -47,16 +47,16 @@ export abstract class Piece implements IPiece {
     }
 
     public move(pos: Coordinates) {
-        console.log(this.legalMove_);
-        console.log(pos);
+        console.log('MOVE: legal moves', this.legalMove_.length);
         if (JSON.stringify(this.legalMove_)
-                .indexOf(JSON.stringify(pos)) !== -1) {
+                .includes(JSON.stringify(pos))) {
 
             this.pos_ = pos;
             this.steps_++;
         } else {
             console.error('Invalid move');
         }
+        console.log('moved')
     }
 
     public abstract select(board: Board, stepCount?: number): Coordinates[];

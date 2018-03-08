@@ -16,7 +16,9 @@ export class King extends Piece {
         let moves: Coordinates[] = [];
         
         const row = this.color_ ? 1 : 8;
-
+        
+        
+        
         if (num + 1 <= 8 && 
             (board.select(char, num + 1).isEmpty() ||
             board.select(char, num + 1).getPiece().color !== this.color)
@@ -95,7 +97,7 @@ export class King extends Piece {
         ) {
                 moves.push({ char: 'g', num: row });
         }
-        console.log(moves);
+
         return this.legalMove_ = moves;
     }
     
@@ -103,7 +105,7 @@ export class King extends Piece {
         const enemys: Piece[] = board.getPieces(!this.color);
         for (let i = 0; i < enemys.length; ++i) {
             if (enemys[i].name !== 'King') {
-                if (JSON.stringify(enemys[i].select(board)).indexOf(JSON.stringify(square)) !== -1) {
+                if (JSON.stringify(enemys[i].select(board)).includes(JSON.stringify(square))) {
                     return true;
                 }
             }

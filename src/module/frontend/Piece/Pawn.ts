@@ -17,6 +17,8 @@ export class Pawn extends Piece {
         const material = new three.MeshStandardMaterial({
             map: null,
             bumpScale: - 0.05,
+            metalness:  this.color_ ? 0 : 0.8,
+            roughness:  this.color_ ? 1 : 0.2,
             color: this.color_ ? 0xffffff : 0x111111,
         });
 

@@ -90,7 +90,7 @@ export class ChessScene {
     private setRender(): void {
         const container = document.createElement( 'div' );
         document.body.appendChild(container);
-        const renderer = new three.WebGLRenderer({ antialias: false });
+        const renderer = new three.WebGLRenderer({ antialias: true });
         renderer.setPixelRatio( window.devicePixelRatio );
         renderer.setSize( window.innerWidth, window.innerHeight );
         renderer.shadowMap.enabled = true;

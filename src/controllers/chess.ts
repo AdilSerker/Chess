@@ -29,7 +29,6 @@ export const choicePiece = (req: Request, res: Response) => {
 
 export const movePiece = (req: Request, res: Response) => {
     try {
-    
         res.json(chess.move({ ...req.body }));
     } catch (error) {
         res.status(400);
