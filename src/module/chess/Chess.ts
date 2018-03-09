@@ -51,6 +51,24 @@ export class Chess {
         }
     }
 
+    public choiceCell(pos: Coordinates): Coordinates[] | void {
+        if (!this.changePawn_) {
+            const piece: Piece = this._getPieceByPos(pos.char, pos.num);
+            
+            if (piece) {
+                this.choicesPiece_ = piece;
+                this.legalMoves_ = piece.select(this.board_);
+                
+
+                this.board_.flashCells(this.legalMoves_);
+
+                return this.legalMoves_;
+            }
+        } else {
+            throw new Error('Change Pawn');
+        }
+    }
+
     public choicePiece(id: number): Coordinates[] {
         if (!this.changePawn_) {
             const piece: Piece = this._getPiece(id);
@@ -69,8 +87,7 @@ export class Chess {
         } else {
             throw new Error('Change Pawn');
         }
-
-    } 
+    }
 
     public move(coordinate: Coordinates): Piece[] {
         if(this.choicesPiece_) {
@@ -84,7 +101,6 @@ export class Chess {
             } else {
                 this.queue = !this.queue;
                 this.choicesPiece_ = null;
-                console.log('CHESS_MOVE: all piece: ', this.pieces_);
                 return this.pieces_;
             }
         } else {
@@ -322,11 +338,6 @@ export class Chess {
         
         rook.move({ char: aftr, num });
         board.insertPiece(rook);
-
-        console.log(`CASTLING: cell [${rook.position.char}, ${rook.position.num}]` , this.board_.select(rook.position.char, rook.position.num));
-        // board.select(aftr, num).emptyCell();
-        
-
     }
 
     private _isAttackedSquare(coordinate: Coordinates): boolean {
@@ -376,9 +387,6 @@ export class Chess {
             return item.color === this.queue && item.name === 'King';
         })[0];
 
-        // const kingPosition = this.queue ?
-        //     this._getPiece(16).position : this._getPiece(32).position;
-        
         return JSON.stringify(cellAttack)
             .includes(JSON.stringify(king.position));
     }

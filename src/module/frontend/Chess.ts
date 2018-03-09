@@ -9,6 +9,7 @@ import { Queen } from './Piece/Queen';
 import { King } from './Piece/King';
 import { Group, Object3D } from 'three';
 import { Piece } from '../chess/ChessPiece/Piece';
+import { Piece as PieceFront } from './Piece/Piece'
 import { Coordinates as Position } from '../chess/types/Coordinates';
 
 import axios, { AxiosPromise } from 'axios';
@@ -18,11 +19,12 @@ import { ipAddress } from '../../config/server';
 const ip = ipAddress.home;
 
 export class Chess {
+    public legalMove: any[];
+
     private board_: Board;
-    private pieces_: any[];
+    private pieces_: PieceFront[];
     private groupMesh_: Group;
     private selectPiece: any;
-    private legalMove_: any[];
 
     public constructor() {
         this.board_ = new Board();
@@ -65,27 +67,49 @@ export class Chess {
 
     public async choisePiece(id: number): Promise<any> {
 
-        this.legalMove_ = [];
         try {
-            this.legalMove_ = (await axios.get(`${ip}/api/chess/piece/${id}`)).data;
+            if (this.legalMove && this.legalMove.length) {
+                const piece = this.pieces_.filter(item => {
+                    return item.id === id;
+                })[0];
+                const pieces = await axios.post(`${ip}/api/chess/piece`, {
+                    char: piece.coordinate_.char,
+                    num: piece.coordinate_.num
+                });
+                this.update(pieces.data);
+                this.legalMove = [];
+            } else {
+                this.legalMove = (await axios.get(`${ip}/api/chess/piece/${id}`)).data;
+                
+
+            }
         } catch (error) {
             console.error(error);
         }
         
     }
-
+    
+    
     public async move(cellId: number): Promise<any> {
         try {
-            if (this.legalMove_ && this.legalMove_.length) {
-                const coordinate: Position = this.board_.getCellById(cellId);
-                const pieces = await axios.post(`${ip}/api/chess/piece/move`, coordinate);
-                this.update(pieces.data);
-            }
+            const coordinate: Position = this.board_.getCellById(cellId);
+            const pieces = await axios.post(`${ip}/api/chess/piece`, coordinate);
+            this.update(pieces.data);
+            this.legalMove = [];
         } catch (error) {
-            console.error(error)
+            this.legalMove = [];
+            console.error(error);
+
         }
     }
 
+    public async choiceCell(cellId: number): Promise<any> {
+        const coordinate: Position = this.board_.getCellById(cellId);
+        this.legalMove = (await axios.post(`${ip}/api/chess/cell`, coordinate)).data;
+    }
+
+
+// сделать апдейт менее заебистым
     private async update(pieces: any[]) {
         this.groupMesh_.children = this.groupMesh_.children.slice(0, 1);
         this.pieces_ = [];
@@ -94,7 +118,6 @@ export class Chess {
                 this.groupMesh_.add(this.initPiece(item));
         });
     }
-
 
     private initPiece(piece: any): Object3D {
 

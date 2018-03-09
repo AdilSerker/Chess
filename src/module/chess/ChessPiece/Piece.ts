@@ -47,7 +47,7 @@ export abstract class Piece implements IPiece {
     }
 
     public move(pos: Coordinates) {
-        console.log('MOVE: legal moves', this.legalMove_.length);
+
         if (JSON.stringify(this.legalMove_)
                 .includes(JSON.stringify(pos))) {
 
@@ -56,7 +56,6 @@ export abstract class Piece implements IPiece {
         } else {
             console.error('Invalid move');
         }
-        console.log('moved')
     }
 
     public abstract select(board: Board, stepCount?: number): Coordinates[];

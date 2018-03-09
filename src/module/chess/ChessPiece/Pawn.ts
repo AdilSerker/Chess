@@ -44,14 +44,14 @@ export class Pawn extends Piece {
             !board.select(CharIndex[index - 1], num).isEmpty() &&
             board.select(CharIndex[index - 1], num).getPiece().enPassant &&
             board.select(CharIndex[index - 1], num).getPiece().isFirstStep()) {
-                console.log('pawn left');
+                
                 moves.push({ char: CharIndex[index - 1], num: step });
         }
         if (CharIndex[index + 1] && num === n &&
             !board.select(CharIndex[index + 1], num).isEmpty() &&
             board.select(CharIndex[index + 1], num).getPiece().enPassant &&
             board.select(CharIndex[index + 1], num).getPiece().isFirstStep()) {
-                console.log('pawn right');
+                
                 moves.push({ char: CharIndex[index + 1], num: step });
         }
 

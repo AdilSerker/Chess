@@ -4,10 +4,11 @@ import { Coordinates } from '../../chess/types/Coordinates';
 require('../lib/OBJLoader');
 
 export class Piece {
-    protected id: number;
+    public id: number;
+    public coordinate_: Coordinates;
+    
     protected mesh_: three.Group;
     protected color_: boolean;
-    protected coordinate_: Coordinates;
 
     public constructor(id: number, position: Coordinates, bool: boolean) {
         this.id = id;

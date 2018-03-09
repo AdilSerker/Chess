@@ -27,6 +27,16 @@ export const choicePiece = (req: Request, res: Response) => {
 
 };
 
+export const choiceCell = (req: Request, res: Response) => {
+    try {
+        res.json(chess.choiceCell({ ...req.body }));
+    } catch (error) {
+        res.status(406);
+        console.error(error.message);
+        res.send(error.message);
+    }
+};
+
 export const movePiece = (req: Request, res: Response) => {
     try {
         res.json(chess.move({ ...req.body }));

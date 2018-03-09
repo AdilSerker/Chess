@@ -30,7 +30,6 @@ export class Board {
     }
 
     public insertPiece(piece: Piece): void {
-        console.log('InsP', piece); 
         this.field_[piece.position.char][piece.position.num].insertPiece(piece);
     }
 
