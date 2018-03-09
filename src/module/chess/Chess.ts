@@ -120,6 +120,11 @@ export class Chess {
         return this.board_;
     }
 
+    public cancelMove(): Piece[] {
+        this._revert();
+        return this.pieces_;
+    }
+
     public pieces(bool?: boolean) {
         return this._getPieces(bool);
     }

@@ -12,5 +12,6 @@ router.get('/chess/piece', chessController.getPieces);
 router.get('/chess/piece/:id', chessController.choicePiece);
 router.post('/chess/piece', chessController.movePiece);
 router.post('/chess/cell', chessController.choiceCell);
-router.put('/chess/changePawn', chessController.changePawn);
+router.put('/chess/change', chessController.changePawn);
+router.get('/chess/cancel', chessController.cancelMove);
 

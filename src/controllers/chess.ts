@@ -47,6 +47,16 @@ export const movePiece = (req: Request, res: Response) => {
     }
 };
 
+export const cancelMove = (req: Request, res: Response) => {
+    try {
+        res.json(chess.cancelMove());
+    } catch (error) {
+        res.status(400);
+        console.error(error.message);
+        res.send(error.message);
+    }
+};
+
 export const changePawn = (req: Request, res: Response) => {
     try {
         res.json(chess.changePawn(req.body.name));
