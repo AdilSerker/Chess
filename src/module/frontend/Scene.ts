@@ -57,12 +57,22 @@ export class ChessScene {
     private async raycast() {
         this.raycaster.setFromCamera(this.mouse, this.camera);
         const intersects: three.Intersection[] = this.raycaster.intersectObjects(this.scene.children, true);
+
         if (intersects[0] && intersects[0].object && intersects[0].object.parent.name !== '') {
+
             const pieceId = +intersects[0].object.parent.name;
             await this.chess.choisePiece(pieceId);
+
         } else if (intersects[0]) {
+
             const cellId = +intersects[0].object.name;
-            await this.chess.move(cellId);
+            console.log(this.chess.legalMove);
+            if (this.chess.legalMove && this.chess.legalMove.length) {
+                await this.chess.move(cellId);
+            } else {
+                await this.chess.choiceCell(cellId);
+            }
+
         }
     }
 

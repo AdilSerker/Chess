@@ -51,8 +51,6 @@ export class Board {
         }
 
         group.add(this.charRow_);
-        
-        console.log(this.columnNum_);
         group.add(this.columnNum_);
         
         return group;
@@ -75,7 +73,7 @@ export class Board {
             roughness: 1.0
         } );
         this.field_ = new three.Mesh(geometry, material);
-        // this.field_.castShadow = true;
+
         this.field_.receiveShadow = true;
     }
 
