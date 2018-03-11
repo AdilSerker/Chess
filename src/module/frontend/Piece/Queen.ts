@@ -34,6 +34,7 @@ export class Queen extends Piece {
         QueenMesh.scale.set(100, 100, 100);
         QueenMesh.position.set(x * 100 - 50, 50, z * 100 - 57);
         QueenMesh.name = `${this.id}`;
+        QueenMesh.type = 'Piece';
         QueenMesh.children[0].castShadow = true;
         QueenMesh.children[0].receiveShadow = true;
         return this.mesh_ = QueenMesh;

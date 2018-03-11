@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { Chess } from '../module/chess/Chess';
+import { Coordinates, KeyIndex, CharIndex } from '../module/chess/types/Coordinates';
 
 const chess: Chess = new Chess();
 
@@ -70,3 +71,23 @@ export const changePawn = (req: Request, res: Response) => {
 export const getPieces = (req: Request, res: Response) => {
     res.json(chess.pieces());
 };
+
+
+/**
+ * WEB SOCKETS Handlers
+ */
+export const move = (coord: Coordinates) => {
+    try {
+        chess.move(coord);
+    } catch (error) {
+        console.error(error);
+    }
+}
+
+export const pieces = (bool?: boolean) => {
+    try {
+        return chess.pieces(bool);
+    } catch (error) {
+        return error.message;
+    }
+}

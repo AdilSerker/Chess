@@ -27,6 +27,7 @@ export class Cell {
         this.cell_.name = `${this.id_}`;
         this.cell_.position.x = x * 100;
         this.cell_.position.z = z * 100;
+        this.cell_.type = 'Cell';
 
         this.coordinate_ = {
             char: charRow[z.toString()],

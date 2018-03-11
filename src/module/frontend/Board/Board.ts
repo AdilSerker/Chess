@@ -107,6 +107,8 @@ export class Board {
             mesh.position.set(-880, 0, z * 100 - 20);
             mesh.rotation.z = - Math.PI * 0.5;
             mesh.rotation.x = - Math.PI * 0.5;
+            mesh.name = SYMBOLS[i];
+            mesh.type = 'Symbols';
             this.charRow_.add(mesh);
 
             const mesh1 = new Mesh( geometry, textMaterial );
@@ -132,6 +134,8 @@ export class Board {
             mesh.position.set(x * 100 - 30, 0, - 870);
             mesh.rotation.z = - Math.PI * 0.5;
             mesh.rotation.x = - Math.PI * 0.5;
+            mesh.name = NUMBERS[j];
+            mesh.type = 'Symbols';
             this.columnNum_.add(mesh);
 
             const mesh1 = new Mesh( geometry, textMaterial );

@@ -32,6 +32,7 @@ export class King extends Piece {
         KingMesh.scale.set(100, 100, 100);
         KingMesh.position.set(x * 100 - 50, 50, z * 100 - 57);
         KingMesh.name = `${this.id}`;
+        KingMesh.type = 'Piece';
         KingMesh.children[0].castShadow = true;
         KingMesh.children[0].receiveShadow = true;
 

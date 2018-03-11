@@ -11,6 +11,7 @@ import * as _ from 'lodash';
 
 
 export class Chess {
+    public id: number;
 
     private pieces_: Piece[];
     private board_: Board;
@@ -30,7 +31,8 @@ export class Chess {
      * PUBLIC
      */
 
-    public constructor() {
+    public constructor(id?: number) {
+        this.id = id;
         this.board_ = new Board();
         this.choicesPiece_ = null;
         this.pieces_ = [];

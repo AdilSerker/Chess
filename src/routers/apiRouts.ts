@@ -1,17 +1,25 @@
 import * as express from 'express';
 import * as apiController from '../controllers/api';
-import * as chessController from '../controllers/chess';
+import * as homeController from "../controllers/home";
+import * as userController from "../controllers/user";
+
+import * as contactController from "../controllers/contact";
+
+
 
 export const router = express.Router();
 
-router.get('/', apiController.getApi);
-router.get('/chess', chessController.getChess);
-router.get('/chess/status', chessController.getStatus);
-router.get('/chess/start', chessController.startChess);
-router.get('/chess/piece', chessController.getPieces);
-router.get('/chess/piece/:id', chessController.choicePiece);
-router.post('/chess/piece', chessController.movePiece);
-router.post('/chess/cell', chessController.choiceCell);
-router.put('/chess/change', chessController.changePawn);
-router.get('/chess/cancel', chessController.cancelMove);
+router.get('/api', apiController.getApi);
 
+router.get("/", homeController.index);
+router.get("/login", userController.getLogin);
+router.post("/login", userController.postLogin);
+router.get("/logout", userController.logout);
+router.get("/forgot", userController.getForgot);
+router.post("/forgot", userController.postForgot);
+router.get("/reset/:token", userController.getReset);
+router.post("/reset/:token", userController.postReset);
+router.get("/signup", userController.getSignup);
+router.post("/signup", userController.postSignup);
+router.get("/contact", contactController.getContact);
+router.post("/contact", contactController.postContact);

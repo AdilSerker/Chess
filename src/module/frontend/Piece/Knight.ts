@@ -33,6 +33,7 @@ export class Knight extends Piece {
         });
         knightMesh.scale.set(100, 100, 100);
         knightMesh.name = `${this.id}`;
+        knightMesh.type = 'Piece';
         if (this.color_) {
             knightMesh.rotation.y = Math.PI * 0.5;
             knightMesh.position.set(x * 100 - 60, 50, z * 100 + 45);

@@ -31,6 +31,7 @@ export class Pawn extends Piece {
         pawnMesh.scale.set(100, 100, 100);
         pawnMesh.position.set(x * 100 - 50, 50, z * 100 - 57);
         pawnMesh.name = `${this.id}`;
+        pawnMesh.type = 'Piece';
         pawnMesh.children[0].castShadow = true;
         pawnMesh.children[0].receiveShadow = true;
 

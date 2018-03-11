@@ -31,6 +31,7 @@ export class Bishop extends Piece {
         BishopMesh.scale.set(100, 100, 100);
         BishopMesh.position.set(x * 100 - 50, 50, z * 100 - 57);
         BishopMesh.name = `${this.id}`;
+        BishopMesh.type = 'Piece';
         BishopMesh.children[0].castShadow = true;
         BishopMesh.children[0].receiveShadow = true;
 

@@ -12,9 +12,14 @@ import { Piece } from '../chess/ChessPiece/Piece';
 import { Piece as PieceFront } from './Piece/Piece'
 import { Coordinates as Position } from '../chess/types/Coordinates';
 
+import { socket } from '../frontend/main'
+
+
 import axios, { AxiosPromise } from 'axios';
 
 import { ipAddress } from '../../config/server';
+
+
 
 const ip = ipAddress.home;
 
@@ -44,15 +49,16 @@ export class Chess {
         ]);
 
         let  pieces: any;
-        const status = (await axios.get(`${ip}/api/chess/status`)).data;
+        const status = (await axios.get(`http://${ip}/chess/status`)).data;
+        
 
         if (!status) {
             console.log(`новая сессия`);
-            await axios.get(`${ip}/api/chess/start`);
-            pieces = await axios.get(`${ip}/api/chess/piece`);
+            await axios.get(`http://${ip}/chess/start`);
+            pieces = await axios.get(`http://${ip}/chess/piece`);
         } else {
             console.log(`восстановление сессии`);
-            pieces = await axios.get(`${ip}/api/chess/piece`);
+            pieces = await axios.get(`http://${ip}/chess/piece`);
         }
         const board = await this.board_.getBoard()
         this.groupMesh_.add(board);
@@ -72,16 +78,17 @@ export class Chess {
                 const piece = this.pieces_.filter(item => {
                     return item.id === id;
                 })[0];
-                const pieces = await axios.post(`${ip}/api/chess/piece`, {
+                
+                socket.send(JSON.stringify({
                     char: piece.coordinate_.char,
                     num: piece.coordinate_.num
-                });
-                this.update(pieces.data);
+                }));
+
                 this.legalMove = [];
             } else {
-                this.legalMove = (await axios.get(`${ip}/api/chess/piece/${id}`)).data;
+                this.legalMove = (await axios.get(`http://${ip}/chess/piece/${id}`)).data;
                 
-
+                this.selectPiece = id;
             }
         } catch (error) {
             console.error(error);
@@ -93,8 +100,9 @@ export class Chess {
     public async move(cellId: number): Promise<any> {
         try {
             const coordinate: Position = this.board_.getCellById(cellId);
-            const pieces = await axios.post(`${ip}/api/chess/piece`, coordinate);
-            this.update(pieces.data);
+            
+            socket.send(JSON.stringify(coordinate));
+
             this.legalMove = [];
         } catch (error) {
             this.legalMove = [];
@@ -103,9 +111,18 @@ export class Chess {
         }
     }
 
+    public updateState(pieces: any[]) {
+        this.groupMesh_.children = this.groupMesh_.children.slice(0, 1);
+        this.pieces_ = [];
+        pieces.forEach((item: any) => {
+            if (item)
+                this.groupMesh_.add(this.initPiece(item));
+        });
+    }
+
     public async choiceCell(cellId: number): Promise<any> {
         const coordinate: Position = this.board_.getCellById(cellId);
-        this.legalMove = (await axios.post(`${ip}/api/chess/cell`, coordinate)).data;
+        this.legalMove = (await axios.post(`http://${ip}/chess/cell`, coordinate)).data;
     }
 
 

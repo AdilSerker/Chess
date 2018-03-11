@@ -54,25 +54,29 @@ export class ChessScene {
         await this.raycast();
     }
 
+    public onUpdate(pieces: any[]) {
+        this.chess.updateState(pieces);
+    }
+
     private async raycast() {
         this.raycaster.setFromCamera(this.mouse, this.camera);
         const intersects: three.Intersection[] = this.raycaster.intersectObjects(this.scene.children, true);
 
-        if (intersects[0] && intersects[0].object && intersects[0].object.parent.name !== '') {
+        if (intersects[0].object.parent.type === 'Piece') {
 
-            const pieceId = +intersects[0].object.parent.name;
+            const pieceId = Number(intersects[0].object.parent.name);
             await this.chess.choisePiece(pieceId);
 
-        } else if (intersects[0]) {
+        } else if (intersects[0] && intersects[0].object.type === 'Cell') {
 
             const cellId = +intersects[0].object.name;
-            console.log(this.chess.legalMove);
             if (this.chess.legalMove && this.chess.legalMove.length) {
                 await this.chess.move(cellId);
             } else {
                 await this.chess.choiceCell(cellId);
             }
-
+        } else if(intersects[0].object.type === 'Symbols') {
+            console.log(intersects[0].object.name);
         }
     }
 
@@ -100,7 +104,7 @@ export class ChessScene {
     private setRender(): void {
         const container = document.createElement( 'div' );
         document.body.appendChild(container);
-        const renderer = new three.WebGLRenderer({ antialias: true });
+        const renderer = new three.WebGLRenderer({ antialias: false });
         renderer.setPixelRatio( window.devicePixelRatio );
         renderer.setSize( window.innerWidth, window.innerHeight );
         renderer.shadowMap.enabled = true;
