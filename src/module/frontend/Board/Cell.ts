@@ -18,7 +18,8 @@ export class Cell {
         const geometry = new three.BoxBufferGeometry(200, 50, 200);
         const material = new three.MeshStandardMaterial( {
             color: bool ? 0xaeaeae : 0x202020,
-            side: three.DoubleSide
+            side: three.DoubleSide,
+            wireframe: false
         } );
         this.color_ = bool;
         this.cell_ = new three.Mesh(geometry, material);

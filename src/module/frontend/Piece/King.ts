@@ -21,6 +21,7 @@ export class King extends Piece {
             metalness:  this.color_ ? 0 : 0.8,
             roughness:  this.color_ ? 1 : 0.2,
             color: this.color_ ? 0xffffff : 0x111111,
+            wireframe: true
         });
 
         const KingMesh = King.meshKing.clone(true);

@@ -11,20 +11,22 @@ import { Group, Object3D } from 'three';
 import { Piece } from '../chess/ChessPiece/Piece';
 import { Piece as PieceFront } from './Piece/Piece'
 import { Coordinates as Position } from '../chess/types/Coordinates';
-
-import { socket } from '../frontend/main'
-
-
-import axios, { AxiosPromise } from 'axios';
-
-import { ipAddress } from '../../config/server';
+import { socket } from './main';
 
 
+// import axios, { AxiosPromise } from 'axios';
 
-const ip = ipAddress.home;
+// import { ipAddress } from '../../config/server';
+
+
+
+let chessId = Number(window.location.pathname.split('/')[2]);
+
 
 export class Chess {
     public legalMove: any[];
+    public playerColor: boolean;
+    public queue: boolean;
 
     private board_: Board;
     private pieces_: PieceFront[];
@@ -35,6 +37,7 @@ export class Chess {
         this.board_ = new Board();
         this.groupMesh_ = new three.Group();
         this.pieces_ = [];
+        this.selectPiece = null;
     }
 
     public async initState(): Promise<Group> {
@@ -48,46 +51,28 @@ export class Chess {
             Board.getFont()
         ]);
 
-        let  pieces: any;
-        const status = (await axios.get(`http://${ip}/chess/status`)).data;
-        
-
-        if (!status) {
-            console.log(`новая сессия`);
-            await axios.get(`http://${ip}/chess/start`);
-            pieces = await axios.get(`http://${ip}/chess/piece`);
-        } else {
-            console.log(`восстановление сессии`);
-            pieces = await axios.get(`http://${ip}/chess/piece`);
-        }
         const board = await this.board_.getBoard()
         this.groupMesh_.add(board);
-
-        pieces.data.forEach((item: any) => {
-            if (item)
-                this.groupMesh_.add(this.initPiece(item));
-        });
 
         return this.groupMesh_;
     }
 
     public async choisePiece(id: number): Promise<any> {
-
+        const queue = this.selectPiece <= 16;
+        const friend = queue ? id <= 16 : id >= 16;
         try {
-            if (this.legalMove && this.legalMove.length) {
+            if (this.legalMove && this.legalMove.length && this.selectPiece && !friend) {
                 const piece = this.pieces_.filter(item => {
                     return item.id === id;
                 })[0];
-                
-                socket.send(JSON.stringify({
-                    char: piece.coordinate_.char,
-                    num: piece.coordinate_.num
-                }));
+
+                socket.emit('move', { ...piece.coordinate_ });
 
                 this.legalMove = [];
+                this.selectPiece = null;
             } else {
-                this.legalMove = (await axios.get(`http://${ip}/chess/piece/${id}`)).data;
                 
+                socket.emit('choice piece', id);
                 this.selectPiece = id;
             }
         } catch (error) {
@@ -100,29 +85,39 @@ export class Chess {
     public async move(cellId: number): Promise<any> {
         try {
             const coordinate: Position = this.board_.getCellById(cellId);
-            
-            socket.send(JSON.stringify(coordinate));
+            socket.emit('move', { ...coordinate });
 
             this.legalMove = [];
+            this.selectPiece = null;
         } catch (error) {
             this.legalMove = [];
             console.error(error);
 
         }
     }
-
+    
     public updateState(pieces: any[]) {
-        this.groupMesh_.children = this.groupMesh_.children.slice(0, 1);
+        this.groupMesh_.children = this.groupMesh_.children.filter(item => {
+            return item.type === 'Group';
+        });
         this.pieces_ = [];
         pieces.forEach((item: any) => {
             if (item)
                 this.groupMesh_.add(this.initPiece(item));
-        });
-    }
+            });
+        }
 
     public async choiceCell(cellId: number): Promise<any> {
-        const coordinate: Position = this.board_.getCellById(cellId);
-        this.legalMove = (await axios.post(`http://${ip}/chess/cell`, coordinate)).data;
+        try {
+            const coordinate: Position = this.board_.getCellById(cellId);
+            socket.emit('choice cell', {
+                ...coordinate
+            });
+            
+            
+        } catch (error) {
+            console.error(error);
+        }
     }
 
 

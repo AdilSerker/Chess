@@ -63,11 +63,14 @@ export class Chess {
                 
 
                 this.board_.flashCells(this.legalMoves_);
-
+                
+                
                 return this.legalMoves_;
+            } else {
+                this.legalMoves_ = [];
             }
         } else {
-            throw new Error('Change Pawn');
+            console.log('Change Pawn');
         }
     }
 
@@ -81,32 +84,37 @@ export class Chess {
                 
 
                 this.board_.flashCells(this.legalMoves_);
-
+                
                 return this.legalMoves_;
             } else {
-                throw new Error('NOT ACCEPTABLE');
+                console.log('NOT ACCEPTABLE');
             }
         } else {
-            throw new Error('Change Pawn');
+            console.log('Change Pawn');
         }
     }
 
     public move(coordinate: Coordinates): Piece[] {
         if(this.choicesPiece_) {
             this._makeDump();
-            this._move(coordinate);
-
-            if (this._isCheck()) {
+            try {
+                this._move(coordinate);
+    
+                if (this._isCheck()) {
+                    
+                    this._revert();
+                    console.log('move on check');
+                } else {
+                    this.queue = !this.queue;
+                    this.choicesPiece_ = null;
+                    return this.pieces_;
+                }
                 
-                this._revert();
-                throw new Error('move on check');
-            } else {
-                this.queue = !this.queue;
-                this.choicesPiece_ = null;
-                return this.pieces_;
+            } catch (error) {
+                console.log(error);
             }
         } else {
-            throw new Error('CHOICE PIECE');
+            console.log('CHOICE PIECE');
         }
     }
 
@@ -146,6 +154,13 @@ export class Chess {
         return this.pieces_;
     }
 
+    public getLegalMove(): Coordinates[] {
+        return this.legalMoves_;
+    }
+
+    public getQueue(): boolean {
+        return this.queue;
+    }
     /**
      * PRIVATE
      */

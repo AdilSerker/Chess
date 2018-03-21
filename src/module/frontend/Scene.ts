@@ -5,10 +5,12 @@ const TrackballControls = require('./lib/TrackballControl');
 require('./lib/ShadowMapViewer');
 require('./lib/Projector');
 import { Chess } from './Chess';
+import { socket } from './main';
 
 
 export class ChessScene {
-    private chess: Chess;
+    public chess: Chess;
+
     private scene: Scene;
     private camera: PerspectiveCamera;
     private cubeCamera: CubeCamera;
@@ -24,6 +26,7 @@ export class ChessScene {
     protected initialized: boolean = false;
 
     public async init(): Promise<void> {
+        console.log('init f in');
         this.initScene();
         await this.initChess();
         this.initCamera();
@@ -32,6 +35,7 @@ export class ChessScene {
         this.setRender();
 
         this.initialized = true;
+        console.log('init f out');
     }
 
     public renderLoop() {
@@ -62,21 +66,27 @@ export class ChessScene {
         this.raycaster.setFromCamera(this.mouse, this.camera);
         const intersects: three.Intersection[] = this.raycaster.intersectObjects(this.scene.children, true);
 
-        if (intersects[0].object.parent.type === 'Piece') {
+        if (intersects[0] && this.chess.playerColor === this.chess.queue) {
+            
+            if (intersects[0].object.parent.type === 'Piece') {
 
-            const pieceId = Number(intersects[0].object.parent.name);
-            await this.chess.choisePiece(pieceId);
+                const pieceId = Number(intersects[0].object.parent.name);
+                await this.chess.choisePiece(pieceId);
+    
+            } else if (intersects[0].object.type === 'Cell') {
+    
+                const cellId = +intersects[0].object.name;
 
-        } else if (intersects[0] && intersects[0].object.type === 'Cell') {
+                if (this.chess.legalMove && this.chess.legalMove.length) {
+                    await this.chess.move(cellId);
+                } else {
+                    await this.chess.choiceCell(cellId);
+                }
 
-            const cellId = +intersects[0].object.name;
-            if (this.chess.legalMove && this.chess.legalMove.length) {
-                await this.chess.move(cellId);
-            } else {
-                await this.chess.choiceCell(cellId);
+            } else if(intersects[0].object.type === 'Symbols') {
+                socket.emit('start', true);
+    
             }
-        } else if(intersects[0].object.type === 'Symbols') {
-            console.log(intersects[0].object.name);
         }
     }
 
