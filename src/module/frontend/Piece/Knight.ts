@@ -5,7 +5,7 @@ require('../lib/OBJLoader');
 import { Piece } from './Piece';
 import { numberColumn, charRow, array } from '../Board/types';
 import { Coordinates as Position, KeyIndex } from '../../chess/types/Coordinates';
-
+import { material } from '../Config/material';
 
 export class Knight extends Piece {
     static meshKnight: any = null;
@@ -16,22 +16,12 @@ export class Knight extends Piece {
         const x = array[this.coordinate_.num];
         const z = array[KeyIndex[this.coordinate_.char]];
 
-        const material = new three.MeshStandardMaterial({
-            map: null,
-            bumpScale: - 0.05,
-            metalness:  this.color_ ? 0 : 0.8,
-            roughness:  this.color_ ? 1 : 0.2,
-            color: this.color_ ? 0xffffff : 0x111111,
-            wireframe: true
-        });
-
-
         const knightMesh = Knight.meshKnight.clone(true);
         knightMesh.traverse(function ( child: any ) {
             if ( child instanceof three.Mesh ) {
-                child.material = material;
+                child.material = material(this.color_);
             }
-        });
+        }.bind(this));
         knightMesh.scale.set(100, 100, 100);
         knightMesh.name = `${this.id}`;
         knightMesh.type = 'Piece';

@@ -1,14 +1,12 @@
 import * as io from 'socket.io-client';
 
-
 import { ChessScene } from './Scene';
 import { Chess } from './Chess';
 import { array } from './Board/types';
 import { ipAddress } from '../../config/server';
+import { PieceResponse } from 'ws';
 
 export const socket = io();
-
-const ip = ipAddress.home;
 
 const scene = new ChessScene();
 
@@ -28,12 +26,17 @@ scene.init().then(() => {
     socket.emit('loaded', id);
 });
 
-
 socket.on('update', (data: any) => {
     const { pieces, queue } = data;
     scene.onUpdate(pieces);
     scene.chess.queue = queue;
 });
+
+socket.on('initial_pieces', (data: any) => {
+    const { pieces, queue } = data;
+    scene.chess.queue = queue;
+    scene.chess.initPieces(pieces);
+})
 
 
 socket.on('player', (color: boolean) => {

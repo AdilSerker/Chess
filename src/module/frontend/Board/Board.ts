@@ -64,7 +64,7 @@ export class Board {
     }
 
     private _initField() {
-        const geometry = new three.BoxBufferGeometry(1800, 1, 1800);
+        const geometry = new three.BoxBufferGeometry(1800, 100, 1800);
         const material = new three.MeshStandardMaterial( {
             map: null,
             bumpScale: - 0.05,
@@ -73,7 +73,7 @@ export class Board {
             roughness: 1.0
         } );
         this.field_ = new three.Mesh(geometry, material);
-
+        this.field_.position.y = -10;
         this.field_.receiveShadow = true;
     }
 
@@ -95,7 +95,7 @@ export class Board {
             const geometry = new three.TextGeometry(SYMBOLS[i], {
                 font: Board.font,
                 size: 50,
-                height: 5,
+                height: 15,
                 curveSegments: 12,
                 bevelThickness: 2,
                 bevelSize: 1,
@@ -104,7 +104,7 @@ export class Board {
             
             const mesh = new Mesh( geometry, textMaterial );
             
-            mesh.position.set(-880, 0, z * 100 - 20);
+            mesh.position.set(-880, 30, z * 100 - 20);
             mesh.rotation.z = - Math.PI * 0.5;
             mesh.rotation.x = - Math.PI * 0.5;
             mesh.name = SYMBOLS[i];
@@ -112,7 +112,7 @@ export class Board {
             this.charRow_.add(mesh);
 
             const mesh1 = new Mesh( geometry, textMaterial );
-            mesh1.position.set(880, 0, z * 100 + 20);
+            mesh1.position.set(880, 30, z * 100 + 20);
             mesh1.rotation.z = Math.PI * 0.5;
             mesh1.rotation.x = - Math.PI * 0.5;
             this.charRow_.add(mesh1);
@@ -122,7 +122,7 @@ export class Board {
             const geometry = new three.TextGeometry(NUMBERS[j], {
                 font: Board.font,
                 size: 50,
-                height: 5,
+                height: 15,
                 curveSegments: 12,
                 bevelThickness: 2,
                 bevelSize: 1,
@@ -131,7 +131,7 @@ export class Board {
 
             const mesh = new Mesh( geometry, textMaterial );
             
-            mesh.position.set(x * 100 - 30, 0, - 870);
+            mesh.position.set(x * 100 - 30, 30, - 870);
             mesh.rotation.z = - Math.PI * 0.5;
             mesh.rotation.x = - Math.PI * 0.5;
             mesh.name = NUMBERS[j];
@@ -139,7 +139,7 @@ export class Board {
             this.columnNum_.add(mesh);
 
             const mesh1 = new Mesh( geometry, textMaterial );
-            mesh1.position.set(x * 100 + 25, 0, 870);
+            mesh1.position.set(x * 100 + 25, 30, 870);
             mesh1.rotation.z = Math.PI * 0.5;
             mesh1.rotation.x = - Math.PI * 0.5;
             

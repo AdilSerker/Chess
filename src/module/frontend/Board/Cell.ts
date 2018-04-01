@@ -16,8 +16,9 @@ export class Cell {
     public constructor(x: number, z: number, bool: boolean) {
         this.id_ = ++ Cell.counter;
         const geometry = new three.BoxBufferGeometry(200, 50, 200);
-        const material = new three.MeshStandardMaterial( {
-            color: bool ? 0xaeaeae : 0x202020,
+        const material = new three.MeshPhongMaterial( {
+            // color: bool ? 0xaeaeae : 0x202020,
+            color: bool ? 0xeeeeee : 0x000000,
             side: three.DoubleSide,
             wireframe: false
         } );

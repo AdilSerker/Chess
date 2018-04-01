@@ -56,14 +56,12 @@ export class Chess {
     public choiceCell(pos: Coordinates): Coordinates[] | void {
         if (!this.changePawn_) {
             const piece: Piece = this._getPieceByPos(pos.char, pos.num);
-            
+
             if (piece) {
                 this.choicesPiece_ = piece;
                 this.legalMoves_ = piece.select(this.board_);
-                
 
                 this.board_.flashCells(this.legalMoves_);
-                
                 
                 return this.legalMoves_;
             } else {
@@ -81,7 +79,6 @@ export class Chess {
             if (piece) {
                 this.choicesPiece_ = piece;
                 this.legalMoves_ = piece.select(this.board_);
-                
 
                 this.board_.flashCells(this.legalMoves_);
                 
@@ -136,7 +133,14 @@ export class Chess {
     }
 
     public pieces(bool?: boolean) {
-        return this._getPieces(bool);
+        return this._getPieces(bool).map((piece: Piece) => {
+            return {
+                name: piece.name,
+                id: piece.id,
+                position: { ...piece.position },
+                color: piece.color
+            };
+        });
     }
 
     public changePawn(piece: string): Piece[] {

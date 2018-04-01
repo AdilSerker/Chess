@@ -4,20 +4,25 @@ import * as _ from 'lodash';
 import { server } from '../server';
 import { Chess } from '../module/chess/Chess';
 import { Coordinates, KeyIndex, CharIndex } from '../module/chess/types/Coordinates';
+import { Connect, ChessRoom, ChessGames, PieceResponse } from '../types/ws'
+import { Piece } from '../module/chess/ChessPiece/Piece';
 
-const clients: any = {};
-const chessRoom: any = {};
-const chess: any = {};
+
+const chessRoom: ChessRoom = {};
+const chess: ChessGames = {};
 
 const io = Socket(server);
 
 io.on('connection', (socket: SocketIO.Socket) => {
     const sid = getSid(socket);
-    const connect: any = {};
+    const connect: Connect = {};
     let roomId: number;
     
     connect[sid] = socket;
-    clients[sid] = socket;
+
+    // socket.on('console', (data: any) => {
+    //     console.log(data);
+    // })
 
     socket.on('loaded', (id: number) => {
         roomId = id;
@@ -43,9 +48,9 @@ io.on('connection', (socket: SocketIO.Socket) => {
             const queue: boolean = chess[id].getQueue();
 
             const pieces = chess[id].pieces();
-            chessRoom[id].forEach((element: any) => {
-                for (let key in element) {
-                    element[key].emit('update', { pieces, queue });
+            chessRoom[id].forEach((player: Connect) => {
+                for (let sid in player) {
+                    player[sid].emit('initial_pieces', { pieces, queue });
                 }
             });
             
@@ -53,15 +58,16 @@ io.on('connection', (socket: SocketIO.Socket) => {
             const player = _.find(chessRoom[id], (player) => {
                 return getKey(player) === sid;
             });
+            player[sid] = socket;
 
+            const queue: boolean = chess[id].getQueue();
+            
+            const pieces = chess[id].pieces();
+            player[sid].emit('initial_pieces', { pieces, queue });
+            
             const index = _.findIndex(chessRoom[id], (player) => {
                 return getKey(player) === sid;
             }) == 0;
-            const queue: boolean = chess[id].getQueue();
-            player[sid] = socket;
-
-            const pieces = chess[id].pieces();
-            player[sid].emit('update', { pieces, queue });
             player[sid].emit('player', index);
         }
     });
@@ -75,22 +81,19 @@ io.on('connection', (socket: SocketIO.Socket) => {
         }
     });
 
-    socket.on('choice cell', (data: any) => {
-        chess[roomId].choiceCell({
-            char: data.char,
-            num: data.num
-        });
+    socket.on('choice cell', (data: Coordinates) => {
+        chess[roomId].choiceCell({ ...data });
         
         socket.emit('legal move', { legalMove: chess[roomId].getLegalMove() });
     });
     
-    socket.on('move', (data: any) => {
+    socket.on('move', (data: Coordinates) => {
         
         chess[roomId].move({ ...data });
 
         const pieces = chess[roomId].pieces();
         const queue: boolean = chess[roomId].getQueue();
-        chessRoom[roomId].forEach((element: any) => {
+        chessRoom[roomId].forEach((element: Connect) => {
             for (let key in element) {
                 element[key].emit('update', { pieces, queue });
             }
@@ -100,8 +103,7 @@ io.on('connection', (socket: SocketIO.Socket) => {
     socket.on('lose', () => {
         if (chessRoom[roomId]) {
 
-            chessRoom[roomId] = chessRoom[roomId].filter((connect: any) => {
-                
+            chessRoom[roomId] = chessRoom[roomId].filter((connect: Connect) => {
                 return getKey(connect) !== sid;
             });
 
@@ -116,20 +118,20 @@ io.on('connection', (socket: SocketIO.Socket) => {
 });
 
 function authChess(id: number, sid: string): boolean {
-    return chessRoom[id].filter((element: any) => {
+    return chessRoom[id].filter((element: Connect) => {
         return getKey(element) === sid
     }).length > 0;
 }
 
-function getKey(connect: any): string {
+function getKey(connect: Connect): string {
     return Object.keys(connect)[0];
 }
 
 function getSid(socket: SocketIO.Socket): string {
     let io = socket.request.headers.cookie.split(' ');
-    return io.map((key: string) => {
-            return key.split('=');            
-        }).filter((item: string[]) => {
-            return item[0] === 'connect.sid';
-        })[0][1];
+    return  io.map((key: string) => {
+                return key.split('=');            
+            }).filter((item: string[]) => {
+                return item[0] === 'connect.sid';
+            })[0][1];
 }

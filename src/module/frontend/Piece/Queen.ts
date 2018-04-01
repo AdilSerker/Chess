@@ -3,7 +3,7 @@ import { Mesh, Scene, Object3D, Vector3, Group } from 'three';
 import { Coordinates } from '../../chess/types/Coordinates';
 require('../lib/OBJLoader');
 import { Piece } from './Piece';
-
+import { material } from '../Config/material';
 import { numberColumn, charRow, array } from '../Board/types';
 import { Coordinates as Position, KeyIndex } from '../../chess/types/Coordinates';
 
@@ -16,22 +16,13 @@ export class Queen extends Piece {
         const x = array[this.coordinate_.num];
         const z = array[KeyIndex[this.coordinate_.char]];
 
-        const material = new three.MeshStandardMaterial({
-            map: null,
-            bumpScale: - 0.05,
-            metalness:  this.color_ ? 0 : 0.8,
-            roughness:  this.color_ ? 1 : 0.2,
-            color: this.color_ ? 0xffffff : 0x111111,
-            wireframe: true
-        });
-
         const QueenMesh: Object3D = Queen.meshQueen.clone(true);
 
         QueenMesh.traverse(function ( child: any ) {
             if ( child instanceof three.Mesh ) {
-                child.material = material;
+                child.material = material(this.color_);
             }
-        });
+        }.bind(this));
         QueenMesh.scale.set(100, 100, 100);
         QueenMesh.position.set(x * 100 - 50, 50, z * 100 - 57);
         QueenMesh.name = `${this.id}`;

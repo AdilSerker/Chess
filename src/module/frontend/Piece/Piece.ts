@@ -15,4 +15,8 @@ export class Piece {
         this.coordinate_ = position;
         this.color_ = bool;
     }
+
+    public getMesh() {
+        return this.mesh_;
+    }
 }
