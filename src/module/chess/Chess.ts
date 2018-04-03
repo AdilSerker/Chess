@@ -53,6 +53,10 @@ export class Chess {
         }
     }
 
+    public get isChangePawn() {
+        return this.changePawn_;
+    }
+
     public choiceCell(pos: Coordinates): Coordinates[] | void {
         if (!this.changePawn_) {
             const piece: Piece = this._getPieceByPos(pos.char, pos.num);
@@ -95,6 +99,7 @@ export class Chess {
         if(this.choicesPiece_) {
             this._makeDump();
             try {
+                console.log()
                 this._move(coordinate);
     
                 if (this._isCheck()) {
@@ -103,6 +108,7 @@ export class Chess {
                     console.log('move on check');
                 } else {
                     this.queue = !this.queue;
+                    
                     this.choicesPiece_ = null;
                     return this.pieces_;
                 }
@@ -145,8 +151,9 @@ export class Chess {
 
     public changePawn(piece: string): Piece[] {
         if (this.changePawn_) {
-            let pieces = this._getPieces(!this.queue);
-            const row  = this.queue ? 1 : 8;
+            let pieces = this._getPieces(this.queue);
+            const row  = this.queue ? 8 : 1;
+            
             const pawn = pieces.filter(item => {
                 return item.name === 'Pawn' && 
                     item.position.num === row;
@@ -154,6 +161,7 @@ export class Chess {
             
             this._insertPiece(piece, pawn);
             this.changePawn_ = false;
+            this.queue = !this.queue;
         }
         return this.pieces_;
     }
@@ -299,6 +307,8 @@ export class Chess {
 
             const row = this.queue ? 8 : 1;
             if (this.choicesPiece_.position.num === row && this.choicesPiece_.name === 'Pawn') {
+                
+                this.queue = !this.queue;
                 
                 this.changePawn_ = true;
             }

@@ -30,12 +30,25 @@ socket.on('update', (data: any) => {
     const { pieces, queue } = data;
     scene.onUpdate(pieces);
     scene.chess.queue = queue;
+    
+});
+
+socket.on('static_update', (data: any) => {
+    const { pieces, queue } = data;
+    scene.onStaticUpdate(pieces);
+    scene.chess.queue = queue;
+    
 });
 
 socket.on('initial_pieces', (data: any) => {
     const { pieces, queue } = data;
     scene.chess.queue = queue;
     scene.chess.initPieces(pieces);
+});
+
+socket.on('is_change_pawn', (data: any) => {
+    scene.chess.changePawn = data;
+    scene.chess.initShiftPawn();
 })
 
 

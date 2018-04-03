@@ -10,6 +10,8 @@ require('./lib/Projector');
 const OrbitControls = require('./lib/OrbitControls');
 const TrackballControls = require('./lib/TrackballControl');
 
+const faster = false;
+
 export class ChessScene {
     public chess: Chess;
 
@@ -37,7 +39,7 @@ export class ChessScene {
     protected initialized: boolean = false;
 
     public async init(): Promise<void> {
-        console.log('init f in');
+        
         this.initScene();
         await this.initChess();
         this.initCamera();
@@ -46,7 +48,7 @@ export class ChessScene {
         this.setRender();
 
         this.initialized = true;
-        console.log('init f out');
+        
     }
 
     public renderLoop() {
@@ -71,6 +73,10 @@ export class ChessScene {
     
     public onUpdate(pieces: PieceResponse[]) {
         this.chess.updateState(pieces);
+    }
+
+    public onStaticUpdate(pieces: PieceResponse[]) {
+        this.chess.staticUpdateState(pieces);
     }
     
     private render() {
@@ -131,25 +137,28 @@ export class ChessScene {
         }
         if (intersects[0] && this.chess.playerColor === this.chess.queue) {
             
-            if (intersects[0].object.parent.type === 'Piece') {
-
-                const pieceId = Number(intersects[0].object.parent.name);
+            if (this.chess.changePawn) {
+                socket.emit('change_pawn', intersects[0].object.parent.name);
+                this.chess.changePawn = false;
+                this.chess.clearShiftPawn();
                 
-                await this.chess.choisePiece(pieceId);
-    
-            } else if (intersects[0].object.type === 'Cell') {
-    
-                const cellId = +intersects[0].object.name;
+            } else {
+                if (intersects[0].object.parent.type === 'Piece') {
 
-                if (this.chess.legalMove && this.chess.legalMove.length) {
-                    await this.chess.move(cellId);
-                } else {
-                    await this.chess.choiceCell(cellId);
+                    const pieceId = Number(intersects[0].object.parent.name);
+                    
+                    await this.chess.choisePiece(pieceId);
+        
+                } else if (intersects[0].object.type === 'Cell') {
+        
+                    const cellId = +intersects[0].object.name;
+    
+                    if (this.chess.legalMove && this.chess.legalMove.length) {
+                        await this.chess.move(cellId);
+                    } else {
+                        await this.chess.choiceCell(cellId);
+                    }
                 }
-
-            } else if(intersects[0].object.type === 'Symbols') {
-                socket.emit('start', true);
-    
             }
         }
     }
@@ -170,7 +179,7 @@ export class ChessScene {
     private setRender(): void {
         const container = document.createElement( 'div' );
         document.body.appendChild(container);
-        this.renderer = new three.WebGLRenderer({ antialias: true });
+        this.renderer = new three.WebGLRenderer({ antialias: faster });
         this.renderer.setPixelRatio( window.devicePixelRatio );
         this.renderer.setSize( window.innerWidth, window.innerHeight );
         this.renderer.shadowMap.enabled = true;
@@ -187,7 +196,7 @@ export class ChessScene {
         this.light = new three.SpotLight( 0xAAAAAA, 0.9, 0, Math.PI / 2  );
         this.light.position.set( 0, 1300, 0 );
         
-        this.light.castShadow = true;
+        this.light.castShadow = faster;
 
         const camera = new three.PerspectiveCamera( 100, 1, 300, 2500 );
         // const helper = new three.CameraHelper(camera);

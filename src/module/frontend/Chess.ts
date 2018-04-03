@@ -2,6 +2,7 @@ import * as three from 'three';
 import * as _ from 'lodash';
 
 import { Board } from './Board/Board';
+import { Cell } from './Board/Cell';
 import { numberColumn, charRow, array } from './Board/types';
 import { Pawn } from './Piece/Pawn';
 import { Rook } from './Piece/Rook';
@@ -21,6 +22,7 @@ export class Chess {
     public legalMove: any[];
     public playerColor: boolean;
     public queue: boolean;
+    public changePawn: boolean;
 
     private pieceVec: three.Vector2 = new three.Vector2();
     private oldPiecePos: three.Vector2 = new three.Vector2();
@@ -91,7 +93,6 @@ export class Chess {
         } catch (error) {
             this.legalMove = [];
             console.error(error);
-
         }
     }
     
@@ -112,7 +113,7 @@ export class Chess {
             const piece = this.initPiece(item);
             this.pieces_.push(piece);
             this.groupMesh_.add(piece.initMesh());
-        })
+        });
     }
     
     
@@ -122,13 +123,20 @@ export class Chess {
     
     public updateState(pieces: PieceResponse[]) {
         this.newState = pieces;
-        const movedPiece = this.getMovedPiece(pieces);
-        this.movedMesh = movedPiece.getMesh();
-        this.oldPiecePos = new three.Vector2(movedPiece.getMesh().position.x, movedPiece.getMesh().position.z);
+        let movedPiece = this.getMovedPiece(pieces);
         
-        this.newPiecePos = this.getNewPosition(movedPiece, pieces);
+        if(movedPiece) {
+            this.movedMesh = movedPiece.getMesh();
+            this.oldPiecePos = new three.Vector2(movedPiece.getMesh().position.x, movedPiece.getMesh().position.z);
+            
+            this.newPiecePos = this.getNewPosition(movedPiece, pieces);
+    
+            this.pieceVec = new three.Vector2().subVectors(this.newPiecePos, this.oldPiecePos);
+        }
+    }
 
-        this.pieceVec = new three.Vector2().subVectors(this.newPiecePos, this.oldPiecePos);
+    public staticUpdateState(pieces: PieceResponse[]) {
+        this.updatePieces(pieces);
     }
     
     public update(dt: number) {
@@ -138,8 +146,9 @@ export class Chess {
 
             const currentPos = this.get2Vector(this.movedMesh.position);
             const subVec = new three.Vector2().subVectors(currentPos, this.oldPiecePos);
+            
             if (subVec.length() > this.pieceVec.length()) {
-                
+            
                 this.movedMesh.position.x = this.newPiecePos.x;
                 this.movedMesh.position.z = this.newPiecePos.y;
                 this.pieceVec = new three.Vector2();
@@ -149,13 +158,83 @@ export class Chess {
 
                 this.updatePieces(this.newState);
             }
+        
         }
     }
+
+    public clearShiftPawn() {
+        this.groupMesh_.children = this.groupMesh_.children.filter(item => {
+            return item.type !== 'swap';
+        });
+        
+    }
+
+    public initShiftPawn() {
+        let group = new three.Group();
+        group.type = 'swap';
+        let plats = this.initPlatform();
+        let shift = this.initSwapPiece();        
+        group.add(plats, shift);
+        this.groupMesh_.add(group);
+    }
+
+    private initSwapPiece() {
+        let group = new three.Group();
+        group.type = 'shift';
+
+        let id = 100;
+        let x = this.queue ? 11 : -11
+        let QueenMesh = new Queen(id++, { char: 'a', num: 1 }, this.queue).initMesh()
+        QueenMesh.position.x = x *100 - 50;
+        QueenMesh.position.z = -600 - 57;
+        QueenMesh.name = 'Queen';
+        group.add(QueenMesh);
+
+        let BishopMesh = new Bishop(id++, { char: 'a', num: 1 }, this.queue).initMesh()
+        BishopMesh.position.x = x *100 - 50;
+        BishopMesh.position.z = -200 - 57;
+        BishopMesh.name = 'Bishop';
+        group.add(BishopMesh);
+
+        let KnightMesh = new Knight(id++, { char: 'a', num: 1 }, this.queue).initMesh()
+        KnightMesh.name = 'Knight';
+        if (this.queue) {
+            KnightMesh.rotation.y = Math.PI * 0.5;
+            KnightMesh.position.set(x * 100 - 60, 50, 200 + 45);
+        } else {
+            KnightMesh.rotation.y = - Math.PI * 0.5;
+            KnightMesh.position.set(x * 100 + 60, 50, 200 - 45);
+        }
+        group.add(KnightMesh);
+
+        let RookMesh = new Rook(id++, { char: 'a', num: 1 }, this.queue).initMesh()
+        RookMesh.position.x = x *100 - 50;
+        RookMesh.position.z = 600 - 57;
+        RookMesh.name = 'Rook';
+        group.add(RookMesh);
+
+        return group;
+    }
     
+    private initPlatform() {
+        let group = new three.Group();
+        let type = 'plat';
+        let x = this.queue ? 11 : -11
+        let platQueen = new Cell(x, -6, !this.queue, type);
+        let platRook = new Cell(x, -2, !this.queue, type);
+        let platKnight = new Cell(x, 2, !this.queue, type);
+        let platBishop = new Cell(x, 6, !this.queue, type);
+        let plats =  [ platQueen, platRook, platKnight, platBishop ];
+        plats.forEach(item => {
+            group.add(item.getCell());
+        });
+        group.type = 'plats';
+        return group;
+    }
     
     private updatePieces(pieces: PieceResponse[]) {
         this.groupMesh_.children = this.groupMesh_.children.filter(item => {
-            return item.type === 'Group';
+            return item.type === 'Group' || item.type === 'swap';
         });
         this.pieces_ = [];
         pieces.forEach((item: any) => {

@@ -13,7 +13,7 @@ export class Cell {
     private cell_: Mesh;
     private coordinate_: Coordinates;
 
-    public constructor(x: number, z: number, bool: boolean) {
+    public constructor(x: number, z: number, bool: boolean, type?: string) {
         this.id_ = ++ Cell.counter;
         const geometry = new three.BoxBufferGeometry(200, 50, 200);
         const material = new three.MeshPhongMaterial( {
@@ -30,6 +30,9 @@ export class Cell {
         this.cell_.position.x = x * 100;
         this.cell_.position.z = z * 100;
         this.cell_.type = 'Cell';
+        if (type) {
+            this.cell_.type = type;
+        }
 
         this.coordinate_ = {
             char: charRow[z.toString()],

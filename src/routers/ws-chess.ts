@@ -90,7 +90,6 @@ io.on('connection', (socket: SocketIO.Socket) => {
     socket.on('move', (data: Coordinates) => {
         
         chess[roomId].move({ ...data });
-
         const pieces = chess[roomId].pieces();
         const queue: boolean = chess[roomId].getQueue();
         chessRoom[roomId].forEach((element: Connect) => {
@@ -98,7 +97,24 @@ io.on('connection', (socket: SocketIO.Socket) => {
                 element[key].emit('update', { pieces, queue });
             }
         });
+        if (chess[roomId].isChangePawn) {
+            console.log(chess[roomId].getQueue());
+            const queue = chess[roomId].getQueue() ? 0 : 1;
+            const key = getKey(chessRoom[roomId][queue]);
+            chessRoom[roomId][queue][key].emit('is_change_pawn', true);
+        }
     });
+
+    socket.on('change_pawn', (data: any) => {
+        chess[roomId].changePawn(data);
+        const pieces = chess[roomId].pieces();
+        const queue: boolean = chess[roomId].getQueue();
+        chessRoom[roomId].forEach((element: Connect) => {
+            for (let key in element) {
+                element[key].emit('static_update', { pieces, queue });
+            }
+        });
+    })
 
     socket.on('lose', () => {
         if (chessRoom[roomId]) {
