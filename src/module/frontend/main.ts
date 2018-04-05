@@ -44,6 +44,7 @@ socket.on('initial_pieces', (data: any) => {
     const { pieces, queue } = data;
     scene.chess.queue = queue;
     scene.chess.initPieces(pieces);
+    scene.tublerLight = true;
 });
 
 socket.on('is_change_pawn', (data: any) => {
@@ -54,7 +55,8 @@ socket.on('is_change_pawn', (data: any) => {
 
 socket.on('player', (color: boolean) => {
     scene.chess.playerColor = color;
-    console.log(scene.chess.playerColor);
+    scene.initVision();
+    scene.resetCamera();
 });
 
 socket.on('tooMany', (data: any) => {

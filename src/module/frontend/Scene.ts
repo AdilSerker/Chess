@@ -10,16 +10,17 @@ require('./lib/Projector');
 const OrbitControls = require('./lib/OrbitControls');
 const TrackballControls = require('./lib/TrackballControl');
 
-const faster = false;
+const faster = true;
 
 export class ChessScene {
     public chess: Chess;
+    public tublerLight: boolean = false;
 
     private scene: Scene;
     private clock: three.Clock;
     private camera: PerspectiveCamera;
-    private cubeCamera: CubeCamera;
-    private light: any;
+    private light: three.SpotLight;
+    private directionLight: three.DirectionalLight;
     private lightVec: Vector2 = new Vector2();
 
     private oldLightPos: Vector2 = new Vector2();
@@ -27,7 +28,7 @@ export class ChessScene {
 
     private lightShadowMap: Light;
     private renderer: WebGLRenderer;
-    private controls: any;
+    private controls: three.TrackballControls;
     private raycaster: Raycaster;
     private projector: Projector;
     private mouse: Vector2;
@@ -39,16 +40,16 @@ export class ChessScene {
     protected initialized: boolean = false;
 
     public async init(): Promise<void> {
-        
         this.initScene();
         await this.initChess();
-        this.initCamera();
-        this.initControl();
         this.initLight();
         this.setRender();
-
+    }
+    
+    public initVision() {
+        this.initCamera();
+        this.initControl();
         this.initialized = true;
-        
     }
 
     public renderLoop() {
@@ -78,13 +79,12 @@ export class ChessScene {
     public onStaticUpdate(pieces: PieceResponse[]) {
         this.chess.staticUpdateState(pieces);
     }
-    
+
     private render() {
         const dt = this.clock.getDelta();
         if (this.initialized) {
-            this.controls.update();
-            this.cubeCamera.update(this.renderer, this.scene);
             this.update(dt);
+            this.controls.update();
             this.renderer.render(this.scene, this.camera);
         }
     }
@@ -110,7 +110,6 @@ export class ChessScene {
     }
 
     private update(dt: number) {
-        
         this.light.position.x += this.lightVec.x * dt;
         this.light.position.z += this.lightVec.y * dt;
 
@@ -124,6 +123,14 @@ export class ChessScene {
         }
 
         this.chess.update(dt);
+
+        if (this.tublerLight) {
+            if (this.directionLight.intensity < 0.6) {
+                this.directionLight.intensity += 0.1 * dt;
+            } else if (this.light.intensity < 0.9) {
+                this.light.intensity += 0.1 * dt;
+            }
+        }
     }
 
     private async raycast() {
@@ -190,10 +197,10 @@ export class ChessScene {
     }
 
     private initLight() {
-        const light = new three.DirectionalLight( 0xffffff, 0.6);
-        light.position.set(0, 2000, 0);
+        this.directionLight = new three.DirectionalLight( 0xffffff, 0);
+        this.directionLight.position.set(0, 2000, 0);
 
-        this.light = new three.SpotLight( 0xAAAAAA, 0.9, 0, Math.PI / 2  );
+        this.light = new three.SpotLight( 0xAAAAAA, 0, 0, Math.PI / 2  );
         this.light.position.set( 0, 1300, 0 );
         
         this.light.castShadow = faster;
@@ -203,26 +210,34 @@ export class ChessScene {
         this.light.shadow = new three.LightShadow(camera) as SpotLightShadow;
 
         this.light.shadow.bias = 0.0001;
-        this.light.shadow.darkness = 0.2;
+        // tslint:disable-next-line
+        this.light.shadow.darkness = 0.2; 
         this.light.shadow.mapSize.width = 2048;
         this.light.shadow.mapSize.height = 2048;
 
-        this.scene.add( this.light, light,
+        this.scene.add( this.light, this.directionLight,
             //  helper 
         );
     }
 
     private initCamera() {
         this.camera = new three.PerspectiveCamera(30, window.innerWidth / window.innerHeight, 1, 100000 );
-        
-        this.cubeCamera = new three.CubeCamera(1, 500, 128);
         this.controls = new three.TrackballControls(this.camera);
+        this.controls.noRoll = true;
+        this.controls.maxDistance = 6500;
+        this.controls.minDistance = 2000;
+        if (this.chess.playerColor) {
+            this.controls.position0.set( -3260, 2300, -50 );
+        } else {
+            this.controls.position0.set( 3260, 2300, -50 );
+        }
+        this.controls.target.set(0,0,0);
         
-        this.resetCamera();
     }
 
     public resetCamera() {
-        this.camera.position.set( -366, 3895, 18 );
+        this.controls.reset();
+
         this.updateCamera();
     }
 
