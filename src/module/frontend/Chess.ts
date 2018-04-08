@@ -163,74 +163,97 @@ export class Chess {
     }
 
     public clearShiftPawn() {
-        this.groupMesh_.children = this.groupMesh_.children.filter(item => {
-            return item.type !== 'swap';
-        });
+        const shftPawn = document.getElementById('shift');
+        shftPawn.innerHTML = '';
         
     }
 
     public initShiftPawn() {
-        let group = new three.Group();
-        group.type = 'swap';
-        let plats = this.initPlatform();
-        let shift = this.initSwapPiece();        
-        group.add(plats, shift);
-        this.groupMesh_.add(group);
+        const shiftPawn = document.createElement('div');
+        shiftPawn.id = 'shift';
+        document.body.appendChild(shiftPawn);
+        let queen, bishop, knight, rook;
+        queen = document.createElement('span');
+        queen.id = 'Queen';
+        queen.innerText = '♕';
+        bishop = document.createElement('span');
+        bishop.id = 'Bishop';
+        bishop.innerText = '♗';
+        knight = document.createElement('span');
+        knight.id = 'Knight';
+        knight.innerText = '♘';
+        rook = document.createElement('span');
+        rook.id = 'Rook';
+        rook.innerText = '♖';
+
+        shiftPawn.appendChild(queen);
+        shiftPawn.appendChild(bishop);
+        shiftPawn.appendChild(knight);
+        shiftPawn.appendChild(rook);
+
+
+
+        // let group = new three.Group();
+        // group.type = 'swap';
+        // let plats = this.initPlatform();
+        // let shift = this.initSwapPiece();        
+        // group.add(plats, shift);
+        // this.groupMesh_.add(group);
     }
 
-    private initSwapPiece() {
-        let group = new three.Group();
-        group.type = 'shift';
+    // private initSwapPiece() {
+    //     let group = new three.Group();
+    //     group.type = 'shift';
 
-        let id = 100;
-        let x = this.queue ? 11 : -11
-        let QueenMesh = new Queen(id++, { char: 'a', num: 1 }, this.queue).initMesh()
-        QueenMesh.position.x = x *100 - 50;
-        QueenMesh.position.z = -600 - 57;
-        QueenMesh.name = 'Queen';
-        group.add(QueenMesh);
+    //     let id = 100;
+    //     let x = this.queue ? 11 : -11
+    //     let QueenMesh = new Queen(id++, { char: 'a', num: 1 }, this.queue).initMesh()
+    //     QueenMesh.position.x = x *100 - 50;
+    //     QueenMesh.position.z = -600 - 57;
+    //     QueenMesh.name = 'Queen';
+    //     group.add(QueenMesh);
 
-        let BishopMesh = new Bishop(id++, { char: 'a', num: 1 }, this.queue).initMesh()
-        BishopMesh.position.x = x *100 - 50;
-        BishopMesh.position.z = -200 - 57;
-        BishopMesh.name = 'Bishop';
-        group.add(BishopMesh);
+    //     let BishopMesh = new Bishop(id++, { char: 'a', num: 1 }, this.queue).initMesh()
+    //     BishopMesh.position.x = x *100 - 50;
+    //     BishopMesh.position.z = -200 - 57;
+    //     BishopMesh.name = 'Bishop';
+    //     group.add(BishopMesh);
 
-        let KnightMesh = new Knight(id++, { char: 'a', num: 1 }, this.queue).initMesh()
-        KnightMesh.name = 'Knight';
-        if (this.queue) {
-            KnightMesh.rotation.y = Math.PI * 0.5;
-            KnightMesh.position.set(x * 100 - 60, 50, 200 + 45);
-        } else {
-            KnightMesh.rotation.y = - Math.PI * 0.5;
-            KnightMesh.position.set(x * 100 + 60, 50, 200 - 45);
-        }
-        group.add(KnightMesh);
+    //     let KnightMesh = new Knight(id++, { char: 'a', num: 1 }, this.queue).initMesh()
+    //     KnightMesh.name = 'Knight';
+    //     if (this.queue) {
+    //         KnightMesh.rotation.y = Math.PI * 0.5;
+    //         KnightMesh.position.set(x * 100 - 60, 50, 200 + 45);
+    //     } else {
+    //         KnightMesh.rotation.y = - Math.PI * 0.5;
+    //         KnightMesh.position.set(x * 100 + 60, 50, 200 - 45);
+    //     }
+    //     group.add(KnightMesh);
 
-        let RookMesh = new Rook(id++, { char: 'a', num: 1 }, this.queue).initMesh()
-        RookMesh.position.x = x *100 - 50;
-        RookMesh.position.z = 600 - 57;
-        RookMesh.name = 'Rook';
-        group.add(RookMesh);
+    //     let RookMesh = new Rook(id++, { char: 'a', num: 1 }, this.queue).initMesh()
+    //     RookMesh.position.x = x *100 - 50;
+    //     RookMesh.position.z = 600 - 57;
+    //     RookMesh.name = 'Rook';
+    //     group.add(RookMesh);
 
-        return group;
-    }
+    //     return group;
+    // }
     
-    private initPlatform() {
-        let group = new three.Group();
-        let type = 'plat';
-        let x = this.queue ? 11 : -11
-        let platQueen = new Cell(x, -6, !this.queue, type);
-        let platRook = new Cell(x, -2, !this.queue, type);
-        let platKnight = new Cell(x, 2, !this.queue, type);
-        let platBishop = new Cell(x, 6, !this.queue, type);
-        let plats =  [ platQueen, platRook, platKnight, platBishop ];
-        plats.forEach(item => {
-            group.add(item.getCell());
-        });
-        group.type = 'plats';
-        return group;
-    }
+    // private initPlatform() {
+    //     let group = new three.Group();
+    //     let type = 'plat';
+    //     let x = this.queue ? 11 : -11
+    //     let platQueen = new Cell(x, -6, !this.queue, type);
+    //     let platRook = new Cell(x, -2, !this.queue, type);
+    //     let platKnight = new Cell(x, 2, !this.queue, type);
+    //     let platBishop = new Cell(x, 6, !this.queue, type);
+    //     let plats =  [ platQueen, platRook, platKnight, platBishop ];
+    //     plats.forEach(item => {
+    //         group.add(item.getCell());
+    //     });
+    //     group.type = 'plats';
+    //     return group;
+    // }
     
     private updatePieces(pieces: PieceResponse[]) {
         this.groupMesh_.children = this.groupMesh_.children.filter(item => {

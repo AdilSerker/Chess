@@ -18,7 +18,11 @@ export class Cell {
         const geometry = new three.BoxBufferGeometry(200, 50, 200);
         const material = new three.MeshPhongMaterial( {
             // color: bool ? 0xaeaeae : 0x202020,
-            color: bool ? 0xeeeeee : 0x000000,
+            color: bool ? 0xaaaaaa : 0x000000,
+            // metalness: bool ? 0.2 : 0.7,
+            // roughness: bool ? 0 : 0.3,
+            // reflectivity: bool ? 0.5 : 0.5,
+            // shininess: bool ? 0.5 : 0.5,
             side: three.DoubleSide,
             wireframe: false
         } );

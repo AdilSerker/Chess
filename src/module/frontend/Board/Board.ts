@@ -69,8 +69,9 @@ export class Board {
             map: null,
             bumpScale: - 0.05,
             color: 0x444444,
-            metalness: 1.5,
-            roughness: 1.0
+            metalness: 1,
+            roughness: 0,
+            
         } );
         this.field_ = new three.Mesh(geometry, material);
         this.field_.position.y = -10;

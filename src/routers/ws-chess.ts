@@ -9,6 +9,7 @@ import { Piece } from '../module/chess/ChessPiece/Piece';
 
 
 const chessRoom: ChessRoom = {};
+chessRoom[0] = [];
 const chess: ChessGames = {};
 
 const io = Socket(server);
@@ -25,51 +26,66 @@ io.on('connection', (socket: SocketIO.Socket) => {
     // })
 
     socket.on('loaded', (id: number) => {
-        roomId = id;
-        if (!chessRoom[id] || chessRoom[id].length == 0) {
-            chessRoom[id] = [];
-            
-            chessRoom[id].push(connect);
+        if (id !== null) {
+            roomId = id;
+            if (!chessRoom[id] || chessRoom[id].length == 0) {
+                chessRoom[id] = [];
+                
+                chessRoom[id].push(connect);
 
-            socket.emit('player', true);
+                socket.emit('player', true);
 
-            console.log(`in room ${id} ${chessRoom[id].length} users`);
+                console.log(`in room ${id} ${chessRoom[id].length} users`);
 
-        } else if (chessRoom[id].length == 1) {
-            chessRoom[id].push(connect);
-            socket.emit('player', false);
-            console.log(`in room ${id} ${chessRoom[id].length} users`);
+            } else if (chessRoom[id].length == 1) {
+                chessRoom[id].push(connect);
+                socket.emit('player', false);
+                console.log(`in room ${id} ${chessRoom[id].length} users`);
 
-            if (!chess[id]) {
-                chess[id] = new Chess(id);
-                chess[id].init();
-            }
-
-            const queue: boolean = chess[id].getQueue();
-
-            const pieces = chess[id].pieces();
-            chessRoom[id].forEach((player: Connect) => {
-                for (let sid in player) {
-                    player[sid].emit('initial_pieces', { pieces, queue });
+                if (!chess[id]) {
+                    chess[id] = new Chess(id);
+                    chess[id].init();
                 }
-            });
-            
-        } else if (authChess(id, sid)) {
-            const player = _.find(chessRoom[id], (player) => {
-                return getKey(player) === sid;
-            });
-            player[sid] = socket;
 
-            const queue: boolean = chess[id].getQueue();
-            
-            const pieces = chess[id].pieces();
-            player[sid].emit('initial_pieces', { pieces, queue });
-            
-            const index = _.findIndex(chessRoom[id], (player) => {
-                return getKey(player) === sid;
-            }) == 0;
-            player[sid].emit('player', index);
+                const queue: boolean = chess[id].getQueue();
+
+                const pieces = chess[id].pieces();
+                chessRoom[id].forEach((player: Connect) => {
+                    for (let sid in player) {
+                        player[sid].emit('initial_pieces', { pieces, queue });
+                    }
+                });
+                if (chess[roomId].isChangePawn) {
+                    const queue = chess[roomId].getQueue() ? 0 : 1;
+                    const key = getKey(chessRoom[roomId][queue]);
+                    chessRoom[roomId][queue][key].emit('is_change_pawn', true);
+                }
+                
+            } else if (authChess(id, sid)) {
+                const player = _.find(chessRoom[id], (player) => {
+                    return getKey(player) === sid;
+                });
+                player[sid] = socket;
+
+                const queue: boolean = chess[id].getQueue();
+                
+                const pieces = chess[id].pieces();
+                player[sid].emit('initial_pieces', { pieces, queue });
+                
+                const index = _.findIndex(chessRoom[id], (player) => {
+                    return getKey(player) === sid;
+                }) == 0;
+                player[sid].emit('player', index);
+                if (chess[roomId].isChangePawn) {
+                    const queue = chess[roomId].getQueue() ? 0 : 1;
+                    const key = getKey(chessRoom[roomId][queue]);
+                    chessRoom[roomId][queue][key].emit('is_change_pawn', true);
+                }
+            }
+        } else {
+            chessRoom[0].push(connect);
         }
+        
     });
 
 
@@ -98,7 +114,6 @@ io.on('connection', (socket: SocketIO.Socket) => {
             }
         });
         if (chess[roomId].isChangePawn) {
-            console.log(chess[roomId].getQueue());
             const queue = chess[roomId].getQueue() ? 0 : 1;
             const key = getKey(chessRoom[roomId][queue]);
             chessRoom[roomId][queue][key].emit('is_change_pawn', true);
