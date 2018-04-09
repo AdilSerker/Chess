@@ -3,7 +3,7 @@ import { Piece } from './Piece';
 import { Board } from '../Board/Board';
 
 export class Pawn extends Piece {
-    
+
 
     public constructor(pos: Coordinates, bool: boolean, id: number) {
         super(pos, bool, id);
@@ -29,18 +29,18 @@ export class Pawn extends Piece {
             moves.push({ char, num: step });
         }
 
-        if (CharIndex[index + 1] && step <= 8 && 
+        if (CharIndex[index + 1] && step <= 8 &&
             board.select(CharIndex[index + 1], step) &&
             !board.select(CharIndex[index + 1], step).isEmpty() &&
             board.select(CharIndex[index + 1], step).getPiece().color !== this.color) {
-                moves.push({ char: CharIndex[index + 1], num: step });
+            moves.push({ char: CharIndex[index + 1], num: step });
         }
 
         if (CharIndex[index - 1] && step <= 8 &&
             board.select(CharIndex[index - 1], step) &&
             !board.select(CharIndex[index - 1], step).isEmpty() &&
             board.select(CharIndex[index - 1], step).getPiece().color !== this.color) {
-                moves.push({ char: CharIndex[index - 1], num: step });
+            moves.push({ char: CharIndex[index - 1], num: step });
         }
 
         if (CharIndex[index - 1] && num === n &&
@@ -48,16 +48,16 @@ export class Pawn extends Piece {
             !board.select(CharIndex[index - 1], num).isEmpty() &&
             board.select(CharIndex[index - 1], num).getPiece().enPassant &&
             board.select(CharIndex[index - 1], num).getPiece().isFirstStep()) {
-                
-                moves.push({ char: CharIndex[index - 1], num: step });
+
+            moves.push({ char: CharIndex[index - 1], num: step });
         }
         if (CharIndex[index + 1] && num === n &&
             board.select(CharIndex[index + 1], num) &&
             !board.select(CharIndex[index + 1], num).isEmpty() &&
             board.select(CharIndex[index + 1], num).getPiece().enPassant &&
             board.select(CharIndex[index + 1], num).getPiece().isFirstStep()) {
-                
-                moves.push({ char: CharIndex[index + 1], num: step });
+
+            moves.push({ char: CharIndex[index + 1], num: step });
         }
 
         return this.legalMove_ = moves;

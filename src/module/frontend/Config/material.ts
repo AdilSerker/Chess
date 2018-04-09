@@ -10,5 +10,5 @@ export const material = (bool: boolean) => {
         wireframe: false,
         side: three.DoubleSide
     });
-}
+};
 

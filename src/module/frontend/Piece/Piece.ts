@@ -6,7 +6,7 @@ require('../lib/OBJLoader');
 export class Piece {
     public id: number;
     public coordinate_: Coordinates;
-    
+
     protected mesh_: three.Group;
     protected color_: boolean;
 

@@ -9,7 +9,7 @@ import { setTimeout } from 'timers';
 
 export const socket = io();
 export let id = Number(window.location.pathname.split('/')[2]);
-let name = `player${Math.random().toString().slice(2, 8)}`;
+const name = `player${Math.random().toString().slice(2, 8)}`;
 
 let click = false;
 export let MENU: boolean;
@@ -30,12 +30,12 @@ urlDiv.appendChild(urlTitle);
 urlDiv.appendChild(urlElement);
 document.body.appendChild(urlDiv);
 
-window.addEventListener( 'resize', scene.resizeWindow.bind(scene), false );
-document.addEventListener( 'mousedown', () => {
+window.addEventListener('resize', scene.resizeWindow.bind(scene), false);
+document.addEventListener('mousedown', () => {
     click = true;
 });
 
-document.addEventListener( 'mouseup', (event) => {
+document.addEventListener('mouseup', (event) => {
     if (click)
         scene.onDocumentMouseDown(event);
 });
@@ -59,14 +59,18 @@ socket.on('update', (data: any) => {
     const { pieces, queue } = data;
     scene.onUpdate(pieces);
     scene.chess.queue = queue;
-    
+
+});
+
+socket.on('notify', (data: string) => {
+    scene.notify(data);
 });
 
 socket.on('static_update', (data: any) => {
     const { pieces, queue } = data;
     scene.onStaticUpdate(pieces);
     scene.chess.queue = queue;
-    
+
 });
 
 socket.on('initial_pieces', (data: any) => {
@@ -82,13 +86,13 @@ socket.on('initial_pieces', (data: any) => {
     setTimeout(() => {
         urlElement.innerText = '';
         urlTitle.innerText = '';
-    }, 5000); 
+    }, 5000);
 });
 
 socket.on('is_change_pawn', (data: any) => {
     scene.chess.changePawn = data;
     scene.chess.initShiftPawn();
-})
+});
 
 
 socket.on('player', (color: boolean) => {
@@ -98,7 +102,7 @@ socket.on('player', (color: boolean) => {
 });
 
 socket.on('tooMany', (data: any) => {
-    if(data.boolean) {
+    if (data.boolean) {
         console.log('fail');
     }
 });

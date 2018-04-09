@@ -15,11 +15,11 @@ export class Pawn extends Piece {
         const x = array[this.coordinate_.num];
         const z = array[KeyIndex[this.coordinate_.char]];
 
-        
+
 
         const pawnMesh: Group = Pawn.meshPawn.clone(true);
-        pawnMesh.traverse(function ( child: any ) {
-            if ( child instanceof three.Mesh ) {
+        pawnMesh.traverse(function (child: any) {
+            if (child instanceof three.Mesh) {
                 child.material = material(this.color_);
             }
         }.bind(this));
@@ -43,8 +43,8 @@ export class Pawn extends Piece {
             loader.load('obj/PawnLight.obj', (object: Object3D) => {
                 Pawn.meshPawn = object;
                 resolve(object);
-            }, ( xhr ) => {
-                if ( xhr.lengthComputable ) {
+            }, (xhr) => {
+                if (xhr.lengthComputable) {
                     const percentComplete = xhr.loaded / xhr.total * 100;
                     // console.log( Math.round(percentComplete) + '% downloaded' );
                 }

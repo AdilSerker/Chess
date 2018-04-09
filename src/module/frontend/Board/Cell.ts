@@ -14,18 +14,13 @@ export class Cell {
     private coordinate_: Coordinates;
 
     public constructor(x: number, z: number, bool: boolean, type?: string) {
-        this.id_ = ++ Cell.counter;
+        this.id_ = ++Cell.counter;
         const geometry = new three.BoxBufferGeometry(200, 50, 200);
-        const material = new three.MeshPhongMaterial( {
-            // color: bool ? 0xaeaeae : 0x202020,
+        const material = new three.MeshPhongMaterial({
             color: bool ? 0xaaaaaa : 0x000000,
-            // metalness: bool ? 0.2 : 0.7,
-            // roughness: bool ? 0 : 0.3,
-            // reflectivity: bool ? 0.5 : 0.5,
-            // shininess: bool ? 0.5 : 0.5,
             side: three.DoubleSide,
             wireframe: false
-        } );
+        });
         this.color_ = bool;
         this.cell_ = new three.Mesh(geometry, material);
         this.cell_.receiveShadow = true;
