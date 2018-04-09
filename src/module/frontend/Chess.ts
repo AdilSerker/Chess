@@ -136,8 +136,8 @@ export class Chess {
 
     public update(dt: number) {
         if (this.movedMesh) {
-            this.movedMesh.position.x += this.pieceVec.x * dt;
-            this.movedMesh.position.z += this.pieceVec.y * dt;
+            this.movedMesh.position.x += this.pieceVec.x * 2 * dt;
+            this.movedMesh.position.z += this.pieceVec.y * 2 * dt;
 
             const currentPos = this.get2Vector(this.movedMesh.position);
             const subVec = new three.Vector2().subVectors(currentPos, this.oldPiecePos);

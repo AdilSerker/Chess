@@ -19,16 +19,18 @@ const scene = new ChessScene();
 
 
 const urlElement = document.createElement('span');
-const urlTitle = document.createElement('span');
+urlElement.id = 'url';
 const url = `${window.location.host}${window.location.pathname}`;
 urlElement.innerText = id ? url : '';
-urlTitle.innerText = id ? `URL: ` : '';
 
 const urlDiv = document.createElement('div');
-urlDiv.id = 'url';
-urlDiv.appendChild(urlTitle);
+urlDiv.id = 'urlBox';
 urlDiv.appendChild(urlElement);
 document.body.appendChild(urlDiv);
+
+urlElement.addEventListener('transitionend', () => {
+    urlDiv.innerHTML = '';
+});
 
 window.addEventListener('resize', scene.resizeWindow.bind(scene), false);
 document.addEventListener('mousedown', () => {
@@ -83,10 +85,7 @@ socket.on('initial_pieces', (data: any) => {
         scene.chess.initShiftPawn();
     }
 
-    setTimeout(() => {
-        urlElement.innerText = '';
-        urlTitle.innerText = '';
-    }, 5000);
+    urlElement.style.opacity = '0';
 });
 
 socket.on('is_change_pawn', (data: any) => {

@@ -5,12 +5,21 @@
 
 // @import "themes/default/default";
 
+@import url('https://fonts.googleapis.com/css?family=Montserrat');
+
 // Scaffolding
 // -------------------------
+
+
+
 
 html {
   position: relative;
   min-height: 100%;
+}
+
+span {
+  font-family: 'Montserrat', sans-serif;
 }
 
 body {
@@ -29,7 +38,7 @@ body {
   cursor: pointer;
 }
 
-#url {
+#urlBox {
   display: inline;
   font-size: 20px;
   position: fixed;
@@ -38,6 +47,7 @@ body {
   color: white;
   cursor: pointer;
 }
+
 
 #box {
   position: fixed;
@@ -58,8 +68,9 @@ body {
 
 a {
   font-size: 50px;
-  color: white;
+  color: #ffffee;
   text-decoration: none;
+  font-family: 'Montserrat', sans-serif;
 }
 
 a:hover {
@@ -67,7 +78,15 @@ a:hover {
   text-decoration: none;
 }
 
+#message {
+  transition-property: opacity;
+  transition-duration: 1s;
+}
 
+#url {
+  transition-property: opacity;
+  transition-duration: 1s;
+}
 
 footer {
   position: absolute;
@@ -121,11 +140,4 @@ textarea {
   padding: 0;
   border-radius: 0;
   box-shadow: 0 0 5px #ccc, inset 0 0 0 #000;
-}
-
-// Font Icons
-// -------------------------
-
-.fa {
-  margin-right: 6px;
 }

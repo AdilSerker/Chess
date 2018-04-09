@@ -81,7 +81,7 @@ export class ChessScene {
 
     private interface(event: any) {
         /* tslint:disable */
-        if (event.path[0].offsetParent.id === 'url') {
+        if (event.path[0].offsetParent.id === 'urlBox') {
             const url = event.path[0]
             let range = document.createRange();
             range.selectNode(url);
@@ -113,16 +113,19 @@ export class ChessScene {
             notify.id = 'notify';
         }
         const message: HTMLSpanElement = document.createElement('span');
+        message.id = 'message';
         notify.innerHTML = '';
         message.innerText = text;
-
         notify.appendChild(message);
         document.body.appendChild(notify);
 
         setTimeout(() => {
-            notify.innerHTML = '';
-        }, 5000);
+            message.style.opacity = '0';
+        }, 3000);
 
+        message.addEventListener('transitionend', () => {
+            notify.innerHTML = '';
+        });
     }
 
     public onUpdate(pieces: PieceResponse[]) {
@@ -166,8 +169,8 @@ export class ChessScene {
     }
 
     private update(dt: number) {
-        this.light.position.x += this.lightVec.x * dt;
-        this.light.position.z += this.lightVec.y * dt;
+        this.light.position.x += this.lightVec.x * 2 * dt;
+        this.light.position.z += this.lightVec.y * 2 * dt;
 
         const currentPos = this.get2Vector(this.light.position);
         const subVec = new Vector2().subVectors(currentPos, this.oldLightPos);
