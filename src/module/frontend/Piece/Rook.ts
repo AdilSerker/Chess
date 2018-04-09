@@ -5,7 +5,7 @@ require('../lib/OBJLoader');
 import { Piece } from './Piece';
 import { numberColumn, charRow, array } from '../Board/types';
 import { Coordinates as Position, KeyIndex } from '../../chess/types/Coordinates';
-
+import { material } from '../Config/material';
 
 export class Rook extends Piece {
     static meshRook: any = null;
@@ -16,23 +16,16 @@ export class Rook extends Piece {
         const x = array[this.coordinate_.num];
         const z = array[KeyIndex[this.coordinate_.char]];
 
-        const material = new three.MeshStandardMaterial({
-            map: null,
-            bumpScale: - 0.05,
-            metalness:  this.color_ ? 0 : 0.8,
-            roughness:  this.color_ ? 1 : 0.2,
-            color: this.color_ ? 0xffffff : 0x111111,
-        });
-
         const rookMesh = Rook.meshRook.clone(true);
         rookMesh.traverse(function ( child: any ) {
             if ( child instanceof three.Mesh ) {
-                child.material = material;
+                child.material = material(this.color_);
             }
-        });
+        }.bind(this));
         rookMesh.scale.set(100, 100, 100);
         rookMesh.position.set(x * 100 - 50, 50, z * 100 - 57);
         rookMesh.name = `${this.id}`;
+        rookMesh.type = 'Piece';
         rookMesh.children[0].castShadow = true;
         rookMesh.children[0].receiveShadow = true;
         return this.mesh_ = rookMesh;

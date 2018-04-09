@@ -4,14 +4,14 @@ import { Cell } from './Cell';
 
 export class Board {
     private field_: any = {
-        a: [ null ],
-        b: [ null ],
-        c: [ null ],
-        d: [ null ],
-        e: [ null ],
-        f: [ null ],
-        g: [ null ],
-        h: [ null ]
+        a: [null],
+        b: [null],
+        c: [null],
+        d: [null],
+        e: [null],
+        f: [null],
+        g: [null],
+        h: [null]
     };
 
     private counter: number = 0;
@@ -54,15 +54,15 @@ export class Board {
     }
 
     public getPieces(bool: boolean): Piece[] {
-        let pieces: Piece[] = [];
-        
+        const pieces: Piece[] = [];
+
         try {
             for (const key in this.field_) {
                 for (let i = 1; i <= 8; ++i) {
                     if (this.field_[key][i] && !this.field_[key][i].isEmpty()) {
                         if (this.field_[key][i].getPiece().color === bool) {
                             const piece = this.field_[key][i].getPiece();
-                            
+
                             pieces.push(piece);
                         }
                     }

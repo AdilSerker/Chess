@@ -1,24 +1,44 @@
 import * as three from 'three';
-import { Scene, Projector, PerspectiveCamera, Raycaster, Light, WebGLRenderer, CameraHelper, CubeCamera, Object3D, SpotLight, Vector3, Ray, Vector2, SpotLightShadow, AmbientLight } from 'three';
-const OrbitControls = require('./lib/OrbitControls');
-const TrackballControls = require('./lib/TrackballControl');
-require('./lib/ShadowMapViewer');
-require('./lib/Projector');
+import { Scene, Projector, PerspectiveCamera, Raycaster, Light, WebGLRenderer, CameraHelper, CubeCamera, Object3D, SpotLight, Vector3, Ray, Vector2, SpotLightShadow, AmbientLight, Path } from 'three';
 import { Chess } from './Chess';
+import { socket } from './main';
+import { PieceResponse } from '../../types/ws';
+import { MENU } from './main';
 
+require('./lib/Projector');
+
+const TrackballControls = require('./lib/TrackballControl');
+
+
+const CAST_SHADOW = false;
+const ANTIALIAS = true;
 
 export class ChessScene {
-    private chess: Chess;
+    public chess: Chess;
+    public tumblerLight: boolean = false;
+
     private scene: Scene;
+    private clock: three.Clock;
     private camera: PerspectiveCamera;
-    private cubeCamera: CubeCamera;
-    private light: Light;
+    private cameraMinLim: three.Vector3;
+
+
+    private light: three.SpotLight;
+    private directionLight: three.DirectionalLight;
+    private lightVec: Vector2 = new Vector2();
+
+    private oldLightPos: Vector2 = new Vector2();
+    private newLightPos: Vector2 = new Vector2();
+
     private lightShadowMap: Light;
     private renderer: WebGLRenderer;
-    private controls: any;
+    private controls: three.TrackballControls;
     private raycaster: Raycaster;
     private projector: Projector;
     private mouse: Vector2;
+
+    private f: number = 0;
+    private s: number = Math.PI / 180;
 
     protected cube: three.Mesh;
     protected initialized: boolean = false;
@@ -26,11 +46,13 @@ export class ChessScene {
     public async init(): Promise<void> {
         this.initScene();
         await this.initChess();
-        this.initCamera();
-        this.initControl();
-        this.initLight();
         this.setRender();
+    }
 
+    public initVision() {
+        this.initCamera();
+        this.initLight();
+        this.initControl();
         this.initialized = true;
     }
 
@@ -46,33 +68,159 @@ export class ChessScene {
     }
 
     public async onDocumentMouseDown(event: MouseEvent) {
-        event.preventDefault();
+        // event.preventDefault();
         this.mouse = new Vector2(
-            ( event.clientX / window.innerWidth ) * 2 - 1,
-          - ( event.clientY / window.innerHeight ) * 2 + 1 );
+            (event.clientX / window.innerWidth) * 2 - 1,
+            - (event.clientY / window.innerHeight) * 2 + 1);
+        this.interface(event);
+        if (!MENU) {
+            await this.raycast();
 
-        await this.raycast();
+        }
+    }
+
+    private interface(event: any) {
+        /* tslint:disable */
+        if (event.path[0].offsetParent.id === 'url') {
+            const url = event.path[0]
+            let range = document.createRange();
+            range.selectNode(url);
+            window.getSelection().addRange(range);
+
+            try {
+                document.execCommand('copy');
+                this.notify('copy to clipboard');
+            } catch (err) {
+                console.log('Can`t copy, boss');
+            }
+
+            window.getSelection().removeAllRanges();
+
+        }
+        if (event.path[0].offsetParent.id === 'shift') {
+            socket.emit('change_pawn', event.path[0].id);
+            this.chess.clearShiftPawn();
+            this.chess.changePawn = false;
+        }
+
+        /* tslint:enable */
+    }
+
+    public notify(text: string) {
+        let notify = document.getElementById('notify');
+        if (!notify) {
+            notify = document.createElement('div');
+            notify.id = 'notify';
+        }
+        const message: HTMLSpanElement = document.createElement('span');
+        notify.innerHTML = '';
+        message.innerText = text;
+
+        notify.appendChild(message);
+        document.body.appendChild(notify);
+
+        setTimeout(() => {
+            notify.innerHTML = '';
+        }, 5000);
+
+    }
+
+    public onUpdate(pieces: PieceResponse[]) {
+        this.chess.updateState(pieces);
+    }
+
+    public onStaticUpdate(pieces: PieceResponse[]) {
+        this.chess.staticUpdateState(pieces);
+    }
+
+    private render() {
+        const dt = this.clock.getDelta();
+        if (this.initialized) {
+            this.update(dt);
+            this.controls.update();
+            this.renderer.render(this.scene, this.camera);
+        }
+    }
+
+    private updatePositionLight(intersects: three.Intersection[]) {
+        const vec = intersects[0].object.position.x === 0 ?
+            intersects[0].object.parent.position :
+            intersects[0].object.position;
+        const newPos = this.get2Vector(vec);
+        this.newLightPos = newPos;
+
+        const currentPos = this.get2Vector(this.light.position);
+        this.oldLightPos = currentPos;
+
+        const vector = new three.Vector2().subVectors(newPos, currentPos);
+        const normalVector = new three.Vector2()
+            .subVectors(newPos, currentPos)
+            .clone()
+            .normalize();
+        this.lightVec = normalVector.multiplyScalar(vector.length());
+    }
+
+    private get2Vector(vector: three.Vector3): three.Vector2 {
+        const { x, z } = vector;
+        return new three.Vector2(x, z);
+    }
+
+    private update(dt: number) {
+        this.light.position.x += this.lightVec.x * dt;
+        this.light.position.z += this.lightVec.y * dt;
+
+        const currentPos = this.get2Vector(this.light.position);
+        const subVec = new Vector2().subVectors(currentPos, this.oldLightPos);
+        if (subVec.length() > this.lightVec.length()) {
+
+            this.light.position.x = this.newLightPos.x;
+            this.light.position.z = this.newLightPos.y;
+            this.lightVec = new Vector2();
+        }
+
+        this.chess.update(dt);
+
+        if (this.tumblerLight) {
+            if (this.directionLight.intensity < 1.2) {
+                this.directionLight.intensity += dt;
+            }
+            else if (this.light.intensity < 1) {
+                this.light.intensity += dt;
+            }
+        }
+        const { x, y, z } = this.camera.position;
+        this.directionLight.position.set(x, y, z);
     }
 
     private async raycast() {
         this.raycaster.setFromCamera(this.mouse, this.camera);
         const intersects: three.Intersection[] = this.raycaster.intersectObjects(this.scene.children, true);
+        if (intersects.length) {
+            this.updatePositionLight(intersects);
+        } else {
+            this.light.position.setX(0);
+            this.light.position.setZ(0);
+        }
+        if (intersects[0] && this.chess.playerColor === this.chess.queue) {
 
-        if (intersects[0] && intersects[0].object && intersects[0].object.parent.name !== '') {
+            if (!this.chess.changePawn) {
+                if (intersects[0].object.parent.type === 'Piece') {
 
-            const pieceId = +intersects[0].object.parent.name;
-            await this.chess.choisePiece(pieceId);
+                    const pieceId = Number(intersects[0].object.parent.name);
 
-        } else if (intersects[0]) {
+                    await this.chess.choisePiece(pieceId);
 
-            const cellId = +intersects[0].object.name;
-            console.log(this.chess.legalMove);
-            if (this.chess.legalMove && this.chess.legalMove.length) {
-                await this.chess.move(cellId);
-            } else {
-                await this.chess.choiceCell(cellId);
+                } else if (intersects[0].object.type === 'Cell') {
+
+                    const cellId = +intersects[0].object.name;
+
+                    if (this.chess.legalMove && this.chess.legalMove.length) {
+                        await this.chess.move(cellId);
+                    } else {
+                        await this.chess.choiceCell(cellId);
+                    }
+                }
             }
-
         }
     }
 
@@ -89,58 +237,47 @@ export class ChessScene {
         this.scene.add(chessState);
     }
 
-    private render() {
-        if (this.initialized) {
-            this.controls.update();
-            this.cubeCamera.update(this.renderer, this.scene);
-            this.renderer.render(this.scene, this.camera);
-        }
-    }
-
     private setRender(): void {
-        const container = document.createElement( 'div' );
+        const container = document.createElement('div');
         document.body.appendChild(container);
-        const renderer = new three.WebGLRenderer({ antialias: true });
-        renderer.setPixelRatio( window.devicePixelRatio );
-        renderer.setSize( window.innerWidth, window.innerHeight );
-        renderer.shadowMap.enabled = true;
-        renderer.shadowMap.type = three.PCFSoftShadowMap;
+        this.renderer = new three.WebGLRenderer({ antialias: ANTIALIAS });
+        this.renderer.setPixelRatio(window.devicePixelRatio);
+        this.renderer.setSize(window.innerWidth, window.innerHeight);
 
-        container.appendChild(renderer.domElement);
-        this.renderer = renderer;
+        container.appendChild(this.renderer.domElement);
     }
 
     private initLight() {
-        const light = new three.SpotLight( 0xffffff, 1, 0, Math.PI / 2  );
-        light.position.set( 0, 1000, 0 );
-        light.target.position.set( 0, 0, 0 );
-        light.castShadow = false;
+        this.directionLight = new three.DirectionalLight(0xffffff, 0);
 
-        light.shadow = new three.LightShadow(
-            new three.PerspectiveCamera( 90, 1, 300, 1500 )
-        ) as SpotLightShadow;
 
-        light.shadow.bias = 0.0001;
-        light.shadow.mapSize.width = 1024;
-        light.shadow.mapSize.height = 1024;
+        this.light = new three.SpotLight(0xffffee, 0, 0, Math.PI);
+        this.light.position.set(0, 100, 0);
 
-        const light2 = new three.SpotLight( 0xf0f0f0, 0.5, 0, Math.PI / 2  );
-        light2.position.set( -3000, 5000, -3000 );
-        light2.target.position.set( 0, 0, 0 );
-
-        this.scene.add( light, light2 );
+        this.scene.add(this.light, this.directionLight);
     }
 
     private initCamera() {
-        this.camera = new three.PerspectiveCamera(30, window.innerWidth / window.innerHeight, 1, 100000 );
-        this.cubeCamera = new three.CubeCamera(1, 500, 128);
+        this.camera = new three.PerspectiveCamera(30, window.innerWidth / window.innerHeight, 1, 100000);
         this.controls = new three.TrackballControls(this.camera);
+        this.controls.noRoll = true;
+        this.controls.maxDistance = 6000;
+        this.controls.minDistance = 2000;
+        this.controls.noRoll = true;
+        this.controls.noPan = true;
 
-        this.resetCamera();
+        if (this.chess.playerColor) {
+            this.controls.position0.set(-3260, 2300, -50);
+        } else {
+            this.controls.position0.set(3260, 2300, -50);
+        }
+        this.controls.target.set(0, 0, 0);
+
     }
 
     public resetCamera() {
-        this.camera.position.set( -366, 3895, 18 );
+        this.controls.reset();
+
         this.updateCamera();
     }
 
@@ -151,9 +288,9 @@ export class ChessScene {
     }
 
     private initScene() {
-        const scene = new three.Scene();
-        scene.background = new three.Color(0x000000);
+        this.scene = new three.Scene();
+        this.scene.background = new three.Color(0x000000);
 
-        this.scene = scene;
+        this.clock = new three.Clock();
     }
 }

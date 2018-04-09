@@ -5,6 +5,7 @@ require('../lib/OBJLoader');
 import { Piece } from './Piece';
 import { numberColumn, charRow, array } from '../Board/types';
 import { Coordinates as Position, KeyIndex } from '../../chess/types/Coordinates';
+import { material } from '../Config/material';
 
 export class Bishop extends Piece {
     static meshBishop: any = null;
@@ -14,23 +15,16 @@ export class Bishop extends Piece {
         const x = array[this.coordinate_.num];
         const z = array[KeyIndex[this.coordinate_.char]];
 
-        const material = new three.MeshStandardMaterial({
-            map: null,
-            bumpScale: - 0.05,
-            metalness:  this.color_ ? 0 : 0.8,
-            roughness:  this.color_ ? 1 : 0.2,
-            color: this.color_ ? 0xffffff : 0x111111,
-        });
-
         const BishopMesh = Bishop.meshBishop.clone(true);
         BishopMesh.traverse(function ( child: any ) {
             if ( child instanceof three.Mesh ) {
-                child.material = material;
+                child.material = material(this.color_);
             }
-        });
+        }.bind(this));
         BishopMesh.scale.set(100, 100, 100);
         BishopMesh.position.set(x * 100 - 50, 50, z * 100 - 57);
         BishopMesh.name = `${this.id}`;
+        BishopMesh.type = 'Piece';
         BishopMesh.children[0].castShadow = true;
         BishopMesh.children[0].receiveShadow = true;
 

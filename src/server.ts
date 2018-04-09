@@ -1,18 +1,17 @@
-import * as errorHandler from "errorhandler";
-
-const app = require("./app");
-
-/**
- * Error Handler. Provides full stack - remove for production
- */
-app.use(errorHandler());
+import * as http from 'http';
+import { app } from './app';
+import { ipAddress } from './config/server';
+const server = http.createServer(app);
+import * as SocketIO from 'socket.io';
 
 /**
  * Start Express server.
  */
-const server = app.listen(app.get("port"), () => {
-  console.log(("  App is running at http://localhost:%d in %s mode"), app.get("port"), app.get("env"));
-  console.log("  Press CTRL-C to stop\n");
+server.listen(process.env.PORT || 8888, () => {
+console.log(`  App is running at http://${ipAddress.home}`);
+console.log("  Press CTRL-C to stop\n");
 });
 
-export = server;
+export { server };
+
+require('./routers/ws-chess');

@@ -1,5 +1,8 @@
 import * as three from 'three';
+import * as _ from 'lodash';
+
 import { Board } from './Board/Board';
+import { Cell } from './Board/Cell';
 import { numberColumn, charRow, array } from './Board/types';
 import { Pawn } from './Piece/Pawn';
 import { Rook } from './Piece/Rook';
@@ -8,21 +11,27 @@ import { Bishop } from './Piece/Bishop';
 import { Queen } from './Piece/Queen';
 import { King } from './Piece/King';
 import { Group, Object3D } from 'three';
-import { Piece } from '../chess/ChessPiece/Piece';
-import { Piece as PieceFront } from './Piece/Piece'
-import { Coordinates as Position } from '../chess/types/Coordinates';
+import { Piece } from './Piece/Piece';
+import { Coordinates as Position, KeyIndex } from '../chess/types/Coordinates';
+import { socket } from './main';
+import { PieceResponse } from 'ws';
 
-import axios, { AxiosPromise } from 'axios';
-
-import { ipAddress } from '../../config/server';
-
-const ip = ipAddress.home;
+const chessId = Number(window.location.pathname.split('/')[2]);
 
 export class Chess {
     public legalMove: any[];
+    public playerColor: boolean;
+    public queue: boolean;
+    public changePawn: boolean;
+
+    private pieceVec: three.Vector2 = new three.Vector2();
+    private oldPiecePos: three.Vector2 = new three.Vector2();
+    private newPiecePos: three.Vector2 = new three.Vector2();
+    private movedMesh: three.Group;
 
     private board_: Board;
-    private pieces_: PieceFront[];
+    private pieces_: Piece[];
+    private newState: PieceResponse[];
     private groupMesh_: Group;
     private selectPiece: any;
 
@@ -30,6 +39,7 @@ export class Chess {
         this.board_ = new Board();
         this.groupMesh_ = new three.Group();
         this.pieces_ = [];
+        this.selectPiece = null;
     }
 
     public async initState(): Promise<Group> {
@@ -43,102 +53,202 @@ export class Chess {
             Board.getFont()
         ]);
 
-        let  pieces: any;
-        const status = (await axios.get(`${ip}/api/chess/status`)).data;
-
-        if (!status) {
-            console.log(`новая сессия`);
-            await axios.get(`${ip}/api/chess/start`);
-            pieces = await axios.get(`${ip}/api/chess/piece`);
-        } else {
-            console.log(`восстановление сессии`);
-            pieces = await axios.get(`${ip}/api/chess/piece`);
-        }
-        const board = await this.board_.getBoard()
+        const board = await this.board_.getBoard();
         this.groupMesh_.add(board);
-
-        pieces.data.forEach((item: any) => {
-            if (item)
-                this.groupMesh_.add(this.initPiece(item));
-        });
 
         return this.groupMesh_;
     }
 
     public async choisePiece(id: number): Promise<any> {
-
+        const queue = this.selectPiece <= 16;
+        const friend = queue ? id <= 16 : id >= 16;
         try {
-            if (this.legalMove && this.legalMove.length) {
-                const piece = this.pieces_.filter(item => {
+            if (this.legalMove && this.legalMove.length && this.selectPiece && !friend) {
+                const piece = this.pieces_.find(item => {
                     return item.id === id;
-                })[0];
-                const pieces = await axios.post(`${ip}/api/chess/piece`, {
-                    char: piece.coordinate_.char,
-                    num: piece.coordinate_.num
                 });
-                this.update(pieces.data);
-                this.legalMove = [];
-            } else {
-                this.legalMove = (await axios.get(`${ip}/api/chess/piece/${id}`)).data;
-                
 
+                socket.emit('move', { ...piece.coordinate_ });
+
+                this.legalMove = [];
+                this.selectPiece = null;
+            } else {
+
+                socket.emit('choice piece', id);
+                this.selectPiece = id;
             }
         } catch (error) {
             console.error(error);
         }
-        
+
     }
-    
-    
+
     public async move(cellId: number): Promise<any> {
         try {
             const coordinate: Position = this.board_.getCellById(cellId);
-            const pieces = await axios.post(`${ip}/api/chess/piece`, coordinate);
-            this.update(pieces.data);
+            socket.emit('move', { ...coordinate });
+
             this.legalMove = [];
+            this.selectPiece = null;
         } catch (error) {
             this.legalMove = [];
             console.error(error);
+        }
+    }
+
+
+    public async choiceCell(cellId: number): Promise<any> {
+        try {
+            const coordinate: Position = this.board_.getCellById(cellId);
+            socket.emit('choice cell', {
+                ...coordinate
+            });
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+    public initPieces(pieces: PieceResponse[]) {
+        pieces.forEach((item: PieceResponse) => {
+            const piece = this.initPiece(item);
+            this.pieces_.push(piece);
+            this.groupMesh_.add(piece.initMesh());
+        });
+    }
+
+    public updateState(pieces: PieceResponse[]) {
+        this.newState = pieces;
+        const movedPiece = this.getMovedPiece(pieces);
+
+        if (movedPiece) {
+            this.movedMesh = movedPiece.getMesh();
+            this.oldPiecePos = new three.Vector2(movedPiece.getMesh().position.x, movedPiece.getMesh().position.z);
+
+            this.newPiecePos = this.getNewPosition(movedPiece, pieces);
+
+            this.pieceVec = new three.Vector2().subVectors(this.newPiecePos, this.oldPiecePos);
+        }
+    }
+
+    public staticUpdateState(pieces: PieceResponse[]) {
+        this.updatePieces(pieces);
+    }
+
+    public update(dt: number) {
+        if (this.movedMesh) {
+            this.movedMesh.position.x += this.pieceVec.x * dt;
+            this.movedMesh.position.z += this.pieceVec.y * dt;
+
+            const currentPos = this.get2Vector(this.movedMesh.position);
+            const subVec = new three.Vector2().subVectors(currentPos, this.oldPiecePos);
+
+            if (subVec.length() > this.pieceVec.length()) {
+
+                this.movedMesh.position.x = this.newPiecePos.x;
+                this.movedMesh.position.z = this.newPiecePos.y;
+                this.pieceVec = new three.Vector2();
+                this.movedMesh = null;
+                this.oldPiecePos = null;
+                this.newPiecePos = null;
+
+                this.updatePieces(this.newState);
+            }
 
         }
     }
 
-    public async choiceCell(cellId: number): Promise<any> {
-        const coordinate: Position = this.board_.getCellById(cellId);
-        this.legalMove = (await axios.post(`${ip}/api/chess/cell`, coordinate)).data;
+    public clearShiftPawn() {
+        const shftPawn = document.getElementById('shift');
+        shftPawn.innerHTML = '';
+
     }
 
+    public initShiftPawn() {
+        const shiftPawn = document.createElement('div');
+        shiftPawn.id = 'shift';
+        document.body.appendChild(shiftPawn);
+        let queen, bishop, knight, rook;
+        queen = document.createElement('span');
+        queen.id = 'Queen';
+        queen.innerText = '♕';
+        bishop = document.createElement('span');
+        bishop.id = 'Bishop';
+        bishop.innerText = '♗';
+        knight = document.createElement('span');
+        knight.id = 'Knight';
+        knight.innerText = '♘';
+        rook = document.createElement('span');
+        rook.id = 'Rook';
+        rook.innerText = '♖';
 
-// сделать апдейт менее заебистым
-    private async update(pieces: any[]) {
-        this.groupMesh_.children = this.groupMesh_.children.slice(0, 1);
+        shiftPawn.appendChild(queen);
+        shiftPawn.appendChild(bishop);
+        shiftPawn.appendChild(knight);
+        shiftPawn.appendChild(rook);
+    }
+
+    private updatePieces(pieces: PieceResponse[]) {
+        this.groupMesh_.children = this.groupMesh_.children.filter(item => {
+            return item.type === 'Group' || item.type === 'swap';
+        });
         this.pieces_ = [];
         pieces.forEach((item: any) => {
-            if (item)
-                this.groupMesh_.add(this.initPiece(item));
+            if (item) {
+                const piece = this.initPiece(item);
+                this.pieces_.push(piece);
+                this.groupMesh_.add(piece.initMesh());
+            }
         });
     }
 
-    private initPiece(piece: any): Object3D {
+    private get2Vector(vector: three.Vector3): three.Vector2 {
+        const { x, z } = vector;
+        return new three.Vector2(x, z);
+    }
 
-        switch (piece.name_) {
+    private getNewPosition(movedPiece: Piece, pieces: PieceResponse[]) {
+        const newPos = pieces.find(item => {
+            return item.id === movedPiece.id;
+        });
+
+        const x = array[movedPiece.coordinate_.num] * 100 - movedPiece.getMesh().position.x;
+        const z = array[KeyIndex[movedPiece.coordinate_.char]] * 100 - movedPiece.getMesh().position.z;
+
+        return new three.Vector2(array[newPos.position.num] * 100 - x, array[KeyIndex[newPos.position.char]] * 100 - z);
+    }
+
+    private getMovedPiece(pieces: PieceResponse[]) {
+        return this.pieces_.find(item => {
+            const piece = pieces.find(piece => {
+                return piece.id === item.id;
+            });
+
+            return piece ? item.coordinate_.char !== piece.position.char ||
+                item.coordinate_.num !== piece.position.num :
+                false;
+        });
+    }
+
+    private initPiece(piece: PieceResponse) {
+
+        switch (piece.name) {
             case `Pawn`:
-                return this._initPawn(piece.id_, piece.pos_, piece.color_);
+                return new Pawn(piece.id, piece.position, piece.color);
 
             case `Rook`:
-                return this._initRook(piece.id_, piece.pos_, piece.color_);
+                return new Rook(piece.id, piece.position, piece.color);
 
             case `Knight`:
-                return this._initKnight(piece.id_, piece.pos_, piece.color_);
+                return new Knight(piece.id, piece.position, piece.color);
 
             case `Bishop`:
-                return this._initBishop(piece.id_, piece.pos_, piece.color_);
+                return new Bishop(piece.id, piece.position, piece.color);
 
             case `Queen`:
-                return this._initQueen(piece.id_, piece.pos_, piece.color_);
+                return new Queen(piece.id, piece.position, piece.color);
 
             case `King`:
-                return this._initKing(piece.id_, piece.pos_, piece.color_);
+                return new King(piece.id, piece.position, piece.color);
 
             default:
                 return null;

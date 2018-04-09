@@ -1,9 +1,9 @@
-@import "themes/default/variables";
+// @import "themes/default/variables";
 
-@import "lib/bootstrap/bootstrap";
-@import "lib/font-awesome/font-awesome";
+// @import "lib/bootstrap/bootstrap";
+// @import "lib/font-awesome/font-awesome";
 
-@import "themes/default/default";
+// @import "themes/default/default";
 
 // Scaffolding
 // -------------------------
@@ -16,7 +16,58 @@ html {
 body {
   padding: 0px;
   margin: 0px;
+  background-color: #000;
 }
+
+#shift {
+  display: inline;
+  font-size: 50px;
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  color: white;
+  cursor: pointer;
+}
+
+#url {
+  display: inline;
+  font-size: 20px;
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  color: white;
+  cursor: pointer;
+}
+
+#box {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+}
+
+#notify {
+  display: inline-block;
+  position: fixed;
+  width: 100%;
+  font-size: 40px;
+  position: fixed;
+  bottom: 20px;
+  text-align: center;
+  color: #ffffee;
+}
+
+a {
+  font-size: 50px;
+  color: white;
+  text-decoration: none;
+}
+
+a:hover {
+  color: white;
+  text-decoration: none;
+}
+
+
 
 footer {
   position: absolute;

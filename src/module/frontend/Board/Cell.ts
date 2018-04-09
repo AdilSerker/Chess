@@ -13,13 +13,14 @@ export class Cell {
     private cell_: Mesh;
     private coordinate_: Coordinates;
 
-    public constructor(x: number, z: number, bool: boolean) {
-        this.id_ = ++ Cell.counter;
+    public constructor(x: number, z: number, bool: boolean, type?: string) {
+        this.id_ = ++Cell.counter;
         const geometry = new three.BoxBufferGeometry(200, 50, 200);
-        const material = new three.MeshStandardMaterial( {
-            color: bool ? 0xaeaeae : 0x202020,
-            side: three.DoubleSide
-        } );
+        const material = new three.MeshPhongMaterial({
+            color: bool ? 0xaaaaaa : 0x000000,
+            side: three.DoubleSide,
+            wireframe: false
+        });
         this.color_ = bool;
         this.cell_ = new three.Mesh(geometry, material);
         this.cell_.receiveShadow = true;
@@ -27,6 +28,10 @@ export class Cell {
         this.cell_.name = `${this.id_}`;
         this.cell_.position.x = x * 100;
         this.cell_.position.z = z * 100;
+        this.cell_.type = 'Cell';
+        if (type) {
+            this.cell_.type = type;
+        }
 
         this.coordinate_ = {
             char: charRow[z.toString()],
